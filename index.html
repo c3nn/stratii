@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>stratii</title>
+	<link rel="icon" href="assets/favicon.png" type="image/x-icon">
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+	<div class="splitViewContainer">
+		<canvas id="mainCanvas" width="1" height="1"></canvas>
+		<div class="controlsContainer">
+			<input class="right" style="top: 0px;" id="renderButton" type="button" value="Render" onclick="render(true)">
+			<span class="right" style="top: 40px; color: #ffffff1a;" id="frames" ></span>
+			<span class="right" style="right: 4px; bottom: 0px; color: #ffffff03; font-size: 2vh;">c3nn</span>
+			
+			<h1>hey</h1>
+			<span><input type="button" value="Turn background on" onclick="backgroundEnabled = true;"></span><br>
+			<span><input type="button" value="Turn background off" onclick="backgroundEnabled = false;"></span><br>
+			<span>Background Color <input type="color" id="bgColor" value="#752115" onchange="background = this.value;"></span><br>
+			<span></span>
+		</div>
+	</div>
+<script src="main.js"></script>
+</body>
+</html>
