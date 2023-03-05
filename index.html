@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -10,13 +10,19 @@
 </head>
 <body>
 	<div class="splitViewContainer">
-		<canvas id="mainCanvas" width="1" height="1"></canvas>
+		<canvas style="z-index: 1;" id="mainCanvas" width="1" height="1"></canvas>
+		<canvas style="z-index: 2; display: none;" id="renderCanvas" width="1" height="1"></canvas>
 		<div class="controlsContainer">
-			<input class="right" style="top: 0px;" id="renderButton" type="button" value="Render" onclick="render(true)">
+			<input class="right" style="top: 0px;" id="renderButton" type="button" value="Render" onclick="renderCanvas.style.display = 'block';render(true)">
 			<span class="right" style="top: 40px; color: #ffffff1a;" id="frames" ></span>
-			<span class="right" style="right: 4px; bottom: 0px; color: #ffffff03; font-size: 2vh;">c3nn</span>
+			<a href="https://c3nn.com" class="right" style="right: 4px; bottom: 0px; color: #ffffff03; font-size: 20px; text-decoration: none;">c3nn</a>
+			<div class="right canvasTypeSelector">
+				<input type="button" style="--img:url(assets/baseIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'base';"></input>
+				<input type="button" style="--img:url(assets/normalsIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'normal';"></input>
+				<input type="button" style="--img:url(assets/renderIcon.png)" onclick="renderCanvas.style.display = 'block';"></input>
+			</div>
 			
-			<h1>hey</h1>
+			<h1>Rendering</h1>
 			<span><input type="button" value="Turn background on" onclick="backgroundEnabled = true;"></span><br>
 			<span><input type="button" value="Turn background off" onclick="backgroundEnabled = false;"></span><br>
 			<span>Background Color <input type="color" id="bgColor" value="#752115" onchange="background = this.value;"></span><br>

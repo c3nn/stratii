@@ -33,7 +33,7 @@
 }
 .controlsContainer .right{
 	position: absolute;
-	right: 0px;
+	right: 2px;
 }
 .controlsContainer h1{
 	margin-top: 2px;
@@ -41,8 +41,26 @@
 	text-decoration: underline;
 }
 .controlsContainer input[type = button]{
-	background: rgba(255, 255, 255, 0.1);
+	background-color: rgba(255, 255, 255, 0.1);
 	margin-top: 2px;
-	border: solid transparent 0px;
+	border: none;
 	border-radius: 3px;
+}
+.controlsContainer .canvasTypeSelector{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	width: 30px;
+	height: 94px;
+	bottom: 26px;
+}
+.controlsContainer .canvasTypeSelector input{
+	width: 30px;
+	height: 30px;
+	background-image: var(--img);
+	background-repeat: no-repeat;
+	background-size: 24px;
+	background-position-x: 3px;
+	background-position-y: 3px;
 }

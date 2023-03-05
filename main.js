@@ -1,14 +1,11 @@
 const mainCanvas = document.querySelector('#mainCanvas'),
 mainContext = mainCanvas.getContext('2d');
-// splitBaseCanvas = document.querySelector('#splitBaseCanvas'),
-// splitBaseContext = splitBaseCanvas.getContext('2d'),
-// splitNormalCanvas = document.querySelector('#splitNormalCanvas'),
-// splitNormalContext = splitNormalCanvas.getContext('2d');
+renderCanvas = document.querySelector('#renderCanvas'),
+renderContext = renderCanvas.getContext('2d'),
 mainContext.imageSmoothingEnabled = false;
-// splitBaseContext.imageSmoothingEnabled = false;
-// splitNormalContext.imageSmoothingEnabled = false;
+renderContext.imageSmoothingEnabled = false;
 
-var splitView = true,
+var canvasType = 'base',
 cameraX = 0,
 cameraY = 0,
 zoom = 1,
@@ -49,8 +46,8 @@ objs = [{
 {
 	isDynamic: true,
 	isSolid: true,
-	x: 303,
-	y: 200,
+	x: 400,
+	y: 300,
 	xmomentum: 0,
 	ymomentum: 0,
 	isTextured: true,
@@ -64,9 +61,9 @@ objs = [{
 	],
 	textureScale: 50,
 	isLight: true,
-	lightColor: {r:255, g:255, b:255},
-	lightFalloffColor: {r:255, g:255, b:255},
-	lightFalloff: 400,
+	lightColor: {r:10, g:10, b:10},
+	lightFalloffColor: {r:0, g:0, b:0},
+	lightFalloff: 800,
 	lightDirection: 0,
 	lightDirectionalFalloff: 1,
 }];
@@ -77,8 +74,7 @@ function resizeCanvas(canvas){
 }
 window.onresize = function(){
 	resizeCanvas(mainCanvas);
-	// resizeCanvas(splitBaseCanvas);
-	// resizeCanvas(splitNormalCanvas);
+	resizeCanvas(renderCanvas);
 };
 window.onresize();
 
@@ -202,11 +198,10 @@ function render(isLighting)
 			});
 		}
 	});
+	framesRendered++
+	document.querySelector('#frames').innerHTML = framesRendered;
 	if(isLighting != true){
-		if(splitView != true){return;}
-		
-		mainContext.putImageData(getImageDataFromContext(gBaseContext, gBaseCanvas.width, gBaseCanvas.height, true), 0, 0);
-		// mainContext.putImageData(getImageDataFromContext(gNormalContext, gNormalCanvas.width, gNormalCanvas.height, true), 0, 0);
+		mainContext.putImageData(getImageDataFromContext((canvasType == 'base'?gBaseContext:gNormalContext), mainCanvas.width, mainCanvas.height, true), 0, 0);
 		return;
 	}
 
@@ -216,11 +211,11 @@ function render(isLighting)
 	objs.forEach(obj => {
 		if(obj.isLight != true){return;}
 		
-		for (let i = 0; i < mainCanvas.width * mainCanvas.height; i++){
-			let pixelX = Math.floor(i%mainCanvas.width),
-			pixelY = Math.floor(i/mainCanvas.width),
+		for (let i = 0; i < renderCanvas.width * renderCanvas.height; i++){
+			let pixelX = Math.floor(i%renderCanvas.width),
+			pixelY = Math.floor(i/renderCanvas.width),
 			lightFalloffAmount = pthag(pixelX - (obj.x + cameraX), pixelY - (obj.y + cameraY)) / obj.lightFalloff;
-			if(lightFalloffAmount > 1 && lightFalloffAmount < 0){return;} // TODO
+			if(lightFalloffAmount > 1 && lightFalloffAmount < 0){return;}
 
 			let basePixel = getFromImageDataI(i, baseImageData),
 			normalPixel = getFromImageDataI(i, normalImageData);
@@ -230,18 +225,16 @@ function render(isLighting)
 				${((obj.lightColor.g - (lightFalloffAmount * (obj.lightColor.g - obj.lightFalloffColor.g))) / 255) * basePixel.g},
 				${((obj.lightColor.b - (lightFalloffAmount * (obj.lightColor.b - obj.lightFalloffColor.b))) / 255) * basePixel.b}
 			)`
-			, mainContext, 1);
+			, renderContext, 1);
 		}
 	});
 
-	framesRendered++
-	document.querySelector('#frames').innerHTML = framesRendered;
 };
 
 
 // createObj();
 // render();
-setInterval(function(){
+var renderInterval = setInterval(function(){
 	render(false);
 }, 10);
 
@@ -272,8 +265,13 @@ mainCanvas.addEventListener("mousemove", (event) => {
 	// mouseMoveCamMomentumX = mouseMoveCamMomentumX * 0.1;
 })
 mainCanvas.addEventListener("wheel", (event) => {
+	console.log(event.deltaY)
+	if(event.deltaY > 100 || event.deltaY < -100){return;}
 	// zoom -= event.deltaY/1000;
 	zoom -= event.deltaY/250 * Math.abs(0-zoom);
 	cameraX += event.deltaY/10 * Math.abs(0-zoom);
 	cameraY += event.deltaY/10 * Math.abs(0-zoom);
+	if(zoom < 0.02){
+		zoom = 0.02;
+	}
 });
