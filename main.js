@@ -44,8 +44,9 @@ objs = [{
 	isLight: false,
 },
 {
-	isDynamic: true,
-	isSolid: true,
+	isDynamic: false,
+	isSolid: false,
+	isHidden: true,
 	x: 400,
 	y: 300,
 	xmomentum: 0,
@@ -53,12 +54,6 @@ objs = [{
 	isTextured: true,
 	textureWidth: 1,
 	textureHeight: 1,
-	texture: [
-		123,255,193,255,
-	],
-	normalTexture: [
-		255,255,255,255,
-	],
 	textureScale: 50,
 	isLight: true,
 	lightColor: {r:10, g:10, b:10},
@@ -69,7 +64,7 @@ objs = [{
 }];
 
 function resizeCanvas(canvas){
-	canvas.width = window.innerWidth*0.8;
+	canvas.width = window.innerWidth-400;
 	canvas.height = window.innerHeight;
 }
 window.onresize = function(){
@@ -130,8 +125,8 @@ function drawPixel(x, y, color = '#000000', canvasContext, scale = 1) {
 	canvasContext.fillRect((ppr == true?Math.round(x):x), (ppr == true?Math.round(y):y), (ppr == true?Math.round(scale):scale), (ppr == true?Math.round(scale):scale));
 }
 function getImageDataFromContext(context, width, height, withoutDotData){
-	if(withoutDotData == true){ return context.getImageData(0,0,width,height); }
-	return context.getImageData(0,0,width,height).data;
+	if(withoutDotData == true){ return context.getImageData(0,0,width,height, { willReadFrequently: true }); }
+	return context.getImageData(0,0,width,height, { willReadFrequently: true }).data;
 }
 function getFromImageData(x, y, width, imageData){
 	return {
@@ -235,15 +230,15 @@ function render(isLighting)
 // createObj();
 // render();
 var renderInterval = setInterval(function(){
-	render(false);
+	if(renderCanvas.style.display == 'none'){
+		render(false);
+	}
 }, 10);
 
 var mouseMoveStartX,
 mouseMoveStartY,
 mouseMoveCamStartX,
 mouseMoveCamStartY,
-mouseMoveCamMomentumX,
-mouseMoveCamMomentumY,
 isMouseDown = false;
 mainCanvas.addEventListener("mousedown", (event) => {
 	mouseMoveStartX = event.clientX;
@@ -259,19 +254,35 @@ mainCanvas.addEventListener("mousemove", (event) => {
 	if(isMouseDown != true){return;}
 	cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX);
 	cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY);
-	// cameraX += mouseMoveCamMomentumX;
-	// cameraY += mouseMoveCamMomentumY;
-	// mouseMoveCamMomentumX = mouseMoveCamMomentumX * 0.1;
-	// mouseMoveCamMomentumX = mouseMoveCamMomentumX * 0.1;
 })
 mainCanvas.addEventListener("wheel", (event) => {
-	console.log(event.deltaY)
+	errMsg(event.deltaY)
 	if(event.deltaY > 100 || event.deltaY < -100){return;}
-	// zoom -= event.deltaY/1000;
 	zoom -= event.deltaY/250 * Math.abs(0-zoom);
 	cameraX += event.deltaY/10 * Math.abs(0-zoom);
 	cameraY += event.deltaY/10 * Math.abs(0-zoom);
 	if(zoom < 0.02){
 		zoom = 0.02;
 	}
-});
+}, { passive: true});
+function errMsg(message){
+	function beGone(){
+		element.style.height = '0px';
+		element.style.borderWidth = '0px';
+		setTimeout(function(){
+			element.remove();
+		}, 1000)
+	}
+	let element = document.createElement('span');
+	element.className = 'errorMessage';
+	element.deleteMePlz = true;
+	element.innerHTML = message;
+	element.onclick = function(){beGone();};
+	element.onmouseover = function(){this.deleteMePlz = false; this.style.background = '#000000'};
+	document.querySelector('.errorContainer').appendChild(element);
+	let deleteTimeout = setTimeout(function(){
+		if(element.deleteMePlz == true){
+			beGone();
+		}
+	}, 3000);
+}

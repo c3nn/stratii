@@ -4,27 +4,65 @@
 	width: 100vw;
 	height: 100vh;
 	user-select: none;
+	--controlsHeight: 0.70;
 }
-.splitViewContainer{
+@keyframes errMsg {
+	0%	{height: 0px; border-width: 0px;}
+	100%{height: 40px; border-width: 10px;}
+}
+.errorContainer{
+	z-index: 9999999;
+	display: flex;
+	justify-content: left;
+	align-items: flex-end;
+	flex-direction: column;
+	position: fixed;
+	bottom: 5px;
+	right: 5px;
+	width: 100vw;
+	height: min-content;
+	gap: 10px;
+	pointer-events: none;
+}
+.errorMessage{
+	width: auto;
+	height: 40px;
+	font-size: 30px;
+	border: solid transparent 10px;
+	border-radius: 20px 20px 0px 20px;
+	color: #ffffff;
+	background: #000000cc;
+	font-family: Open Sans; 
+	transition: background 0.3s ease, height 0.3s ease-in, border-width 0.3s ease-in;
+	text-align: center;
+	overflow: hidden;
+	animation: errMsg 0.3s;
+	pointer-events: all;
+}
+.mainContainer{
 	position: fixed;
 	width: 100vw;
 	height: 100vh;
 	top: 0px;
 	left: 0px;
 }
-.splitViewContainer canvas, .splitViewContainer div{
+.mainContainer canvas{
 	position: absolute;
 	right: 0px;
-	width: 80%;
+	width: calc(100vw - 400px);
 	height: 100%;
 	background: transparent;
 	image-rendering: pixelated;
 }
-.splitViewContainer .controlsContainer{
+.controlsContainer, .objectsContainer{
+	position: absolute;
 	background: rgba(0, 0, 0, 0.2);
 	right: auto;
 	left: 0px;
-	width: 20%;
+	width: 400px;
+}
+.controlsContainer{
+	height: calc(100vh * var(--controlsHeight));
 }
 .controlsContainer *{
 	color: #ffffff;
@@ -53,7 +91,7 @@
 	align-items: center;
 	width: 30px;
 	height: 94px;
-	bottom: 26px;
+	bottom: 35px;
 }
 .controlsContainer .canvasTypeSelector input{
 	width: 30px;
@@ -63,4 +101,11 @@
 	background-size: 24px;
 	background-position-x: 3px;
 	background-position-y: 3px;
+	position: relative;
+	image-rendering: pixelated;
+}
+.objectsContainer{
+	height: calc(100vh - 100vh * var(--controlsHeight));
+	top: auto;
+	bottom: 0px;
 }
