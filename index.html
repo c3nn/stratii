@@ -18,6 +18,7 @@
 				<span class="right" style="top: 40px; color: #ffffff1a;" id="frames" ></span>
 				<a href="https://c3nn.com" class="right" style="right: 4px; bottom: 0px; color: #ffffff03; font-size: 20px; text-decoration: none;">c3nn</a>
 				<div class="right canvasTypeSelector">
+					<input type="button" style="--img:url(assets/overlaysIcon.png); margin-bottom: 5px;" onclick="errMsg('coming soon :)')"></input>
 					<input type="button" style="--img:url(assets/baseIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'base';"></input>
 					<input type="button" style="--img:url(assets/normalsIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'normal';"></input>
 					<input type="button" style="--img:url(assets/renderIcon.png)" onclick="if(getFromImageData(0,0,1,getImageDataFromContext(renderContext,1,1)).a == 0){errMsg('you need to render something first');return;}renderCanvas.style.display = 'block';"></input>
@@ -26,7 +27,7 @@
 				<h1>Rendering</h1>
 				<span><input type="button" value="Turn background on" onclick="backgroundEnabled = true;"></span><br>
 				<span><input type="button" value="Turn background off" onclick="backgroundEnabled = false;"></span><br>
-				<span>Background Color <input type="color" id="bgColor" value="#752115" onchange="background = this.value;"></span><br>
+				<span>Background Color <input type="color" id="bgColor" value="#5a371c" onchange="background = this.value;"></span><br>
 				<span></span>
 			</div>
 			<div class="objectsContainer">

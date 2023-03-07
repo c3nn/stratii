@@ -11,7 +11,7 @@ cameraY = 0,
 zoom = 1,
 ppr = true, // Pixel Perfect Rendering
 globalLighting = 10,
-background = 'rgb(117, 33, 21)',
+background = 'rgb(90, 55, 28)',
 backgroundEnabled = true,
 framesRendered = 0,
 objs = [{
@@ -56,7 +56,7 @@ objs = [{
 	textureHeight: 1,
 	textureScale: 50,
 	isLight: true,
-	lightColor: {r:10, g:10, b:10},
+	lightColor: {r:255, g:255, b:255},
 	lightFalloffColor: {r:0, g:0, b:0},
 	lightFalloff: 800,
 	lightDirection: 0,
@@ -256,7 +256,6 @@ mainCanvas.addEventListener("mousemove", (event) => {
 	cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY);
 })
 mainCanvas.addEventListener("wheel", (event) => {
-	errMsg(event.deltaY)
 	if(event.deltaY > 100 || event.deltaY < -100){return;}
 	zoom -= event.deltaY/250 * Math.abs(0-zoom);
 	cameraX += event.deltaY/10 * Math.abs(0-zoom);
