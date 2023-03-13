@@ -21,21 +21,22 @@
 					<input type="button" style="--img:url(assets/overlaysIcon.png); margin-bottom: 5px;" onclick="errMsg('coming soon :)')"></input>
 					<input type="button" style="--img:url(assets/baseIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'base';"></input>
 					<input type="button" style="--img:url(assets/normalsIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'normal';"></input>
-					<input type="button" style="--img:url(assets/renderIcon.png)" onclick="if(getFromImageData(0,0,1,getImageDataFromContext(renderContext,1,1)).a == 0){errMsg('you need to render something first');return;}renderCanvas.style.display = 'block';"></input>
+					<input type="button" style="--img:url(assets/renderIcon.png)" onclick="if(getFromImageData(0,0,1,getImageDataFromContext(renderContext,1,1)).a == 0){render(true);}renderCanvas.style.display = 'block';"></input>
 				</div>
 				
-				<h1>Rendering</h1>
-				<span><input type="button" value="Turn background on" onclick="backgroundEnabled = true;"></span><br>
-				<span><input type="button" value="Turn background off" onclick="backgroundEnabled = false;"></span><br>
-				<span>Background Color <input type="color" id="bgColor" value="#5a371c" onchange="background = this.value;"></span><br>
-				<span></span>
+				<h1>Background Settings</h1>
+				<span><input type="button" value="off" onclick="backgroundEnabled = false;"></span>
+				<span><input type="button" value="on" onclick="backgroundEnabled = true;"></span>
+				<span>Color <input type="color" id="bgColor" value="#5a371c" onchange="background = this.value;"></span><br>
 			</div>
 			<div class="objectsContainer">
-				<span style="color: white;">objects here *-*</span>
+				<span style="color: white;">objects here *-* (coming soon)</span>
 			</div>
 		</div>
 	</div>
+	
 	<div class="errorContainer"></div>
+<script src="ui.js"></script>
 <script src="main.js"></script>
 </body>
 </html>

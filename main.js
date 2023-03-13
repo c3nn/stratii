@@ -3,18 +3,63 @@ mainContext = mainCanvas.getContext('2d');
 renderCanvas = document.querySelector('#renderCanvas'),
 renderContext = renderCanvas.getContext('2d'),
 mainContext.imageSmoothingEnabled = false;
-renderContext.imageSmoothingEnabled = false;
+renderContext.imageSmoothingEnabled = false,
+lightOverlayTexture = [
+	0,0,0,0, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,0,
+	0,0,0,255, 0,0,0,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 0,0,0,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 255,255,255,255, 0,0,0,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 255,255,255,255, 0,0,0,255,
+	0,0,0,255, 0,0,0,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 0,0,0,255, 0,0,0,255,
+	0,0,0,0, 0,0,0,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 0,0,0,255, 0,0,0,0,
+	0,0,0,0, 0,0,0,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255, 0,0,0,255, 0,0,0,0,
+	0,0,0,0, 0,0,0,255, 0,0,0,255, 255,255,255,255, 255,255,255,255, 0,0,0,255, 0,0,0,255, 0,0,0,0,
+	0,0,0,0, 0,0,0,0, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,0, 0,0,0,0,
+];
+function resizeCanvas(canvas){
+	canvas.width = window.innerWidth-400;
+	canvas.height = window.innerHeight;
+}
+window.onresize = function(){
+	resizeCanvas(mainCanvas);
+	resizeCanvas(renderCanvas);
+	renderCanvas.style.display = 'none';
+};
+window.onresize();
 
 var canvasType = 'base',
-cameraX = 0,
-cameraY = 0,
+cameraX = 100,
+cameraY = 100,
 zoom = 1,
 ppr = true, // Pixel Perfect Rendering
-globalLighting = 10,
+globalLighting = {r:30,g:30,b:200},
 background = 'rgb(90, 55, 28)',
 backgroundEnabled = true,
 framesRendered = 0,
-objs = [{
+objs = [
+{ // mesh obj
+	isDynamic: true,
+	isSolid: true,
+	width: 1,
+	height: 1,
+	x: 200,
+	y: 200,
+	xmomentum: 0,
+	ymomentum: 0,
+	mass: 1,
+	bouncyness: 1,
+	mesh: [[{x:0,y:0},{x:100,y:100},{x:200,y:0}]],
+	color: '#ffffff',
+	isLight: false,
+},
+{ // textured obj
 	isDynamic: true,
 	isSolid: true,
 	width: 1,
@@ -43,12 +88,12 @@ objs = [{
 	textureScale: 50,
 	isLight: false,
 },
-{
+{ // light
 	isDynamic: false,
 	isSolid: false,
 	isHidden: true,
-	x: 400,
-	y: 300,
+	x: -60,
+	y: 20,
 	xmomentum: 0,
 	ymomentum: 0,
 	isTextured: true,
@@ -56,22 +101,12 @@ objs = [{
 	textureHeight: 1,
 	textureScale: 50,
 	isLight: true,
-	lightColor: {r:255, g:255, b:255},
-	lightFalloffColor: {r:0, g:0, b:0},
-	lightFalloff: 800,
-	lightDirection: 0,
-	lightDirectionalFalloff: 1,
+	lightColor: {r:255, g:100, b:100},
+	lightRadialFalloff: 400,
+	lightDirection: 1,
+	lightAngularFalloff: 1,
+	lightAngularClamp: 0.75,
 }];
-
-function resizeCanvas(canvas){
-	canvas.width = window.innerWidth-400;
-	canvas.height = window.innerHeight;
-}
-window.onresize = function(){
-	resizeCanvas(mainCanvas);
-	resizeCanvas(renderCanvas);
-};
-window.onresize();
 
 function createObj(options = {
 	// physics
@@ -105,10 +140,10 @@ function createObj(options = {
 	// isLight
 	isLight: false, // does the object emmit light?
 	lightColor: {r:255, g:255, b:255}, // light color at center
-	lightFalloffColor: {r: 0, g: 0, b: 0}, // light color at edge
-	lightFalloff: 100, // pixels the light reaches
-	lightDirection: 0, // 0-360
-	lightDirectionalFalloff: 1, // 0-1
+	lightRadialFalloff: 100, // pixels the light reaches
+	// lightDirection: 0, // ? doesnt work...
+	lightAngularFalloff: 1, // 0-1*
+	lightAngularClamp: 0.75, // 0-1
 
 	// functions
 	runFunctions: false, // run functions?
@@ -145,7 +180,19 @@ function getFromImageDataI(i, imageData){
 	};
 }
 function pthag(a,b){
-	return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+	return Math.sqrt(a*a + b*b);
+}
+// function getAngularVector(y,x){
+// 	return Math.atan(y/x)*(180/Math.PI)+90+(x < 0?180:0);
+// }
+function smoothStep(edge1,edge0,x){
+	if (x < edge0){
+		return 0;
+	}else if(x >= edge1){
+		return 1;
+	}
+	let y = (x - edge0) / (edge1 - edge0);
+	return y * y * (3 - 2 * y);
 }
 
 function render(isLighting)
@@ -164,18 +211,27 @@ function render(isLighting)
 		gBaseContext.fillRect(0,0,gBaseCanvas.width, gBaseCanvas.height);
 	}
 	objs.forEach(obj => {
-		if(obj.isHidden == true){return;}
+		let objIsLight = (isLighting != true && obj.isLight == true?true:false)
+		if(obj.isHidden == true && objIsLight != true){return;}
 		
 		// write to canvas using texture || mesh
-		if(obj.isTextured == true){
-			// write to (base && normal) canvas using texture
-			// when drawing normals; blue channel needs to be maxxed
-			for (let i = 0; i < obj.textureWidth * obj.textureHeight; i++) {
-				let texturePixel = getFromImageDataI(i, obj.texture);
-				let normalPixel = getFromImageDataI(i, obj.normalTexture)
+		if(obj.isTextured == true || objIsLight == true){
+			let calculatedObjX = cameraX + (ppr == true?Math.round(obj.x * zoom):obj.x * zoom),
+			calculatedObjY = cameraY + (ppr == true?Math.round(obj.y * zoom):obj.y * zoom),
+			calculatedObjZoom = (ppr == true?Math.round(obj.textureScale * zoom):obj.textureScale * zoom),
+			loops = (objIsLight == true?136:obj.textureWidth * obj.textureHeight),
+			objTexture = (objIsLight == true?lightOverlayTexture:obj.texture),
+			objNormalTexture = (objIsLight == true?lightOverlayTexture:obj.normalTexture),
+			objZoom = (objIsLight == true?3:obj.textureScale * zoom);
 
-				drawPixel(cameraX + (ppr == true?Math.round(obj.x * zoom):obj.x * zoom) + (i%obj.textureWidth) * (ppr == true?Math.round(obj.textureScale * zoom):obj.textureScale * zoom), cameraY + (ppr == true?Math.round(obj.y * zoom):obj.y * zoom) + Math.floor(i/obj.textureWidth) * (ppr == true?Math.round(obj.textureScale * zoom):obj.textureScale * zoom), `rgba(${texturePixel.r},${texturePixel.g},${texturePixel.b},${texturePixel.a/255})`,gBaseContext, obj.textureScale * zoom);
-				drawPixel(cameraX + (ppr == true?Math.round(obj.x * zoom):obj.x * zoom) + (i%obj.textureWidth) * (ppr == true?Math.round(obj.textureScale * zoom):obj.textureScale * zoom), cameraY + (ppr == true?Math.round(obj.y * zoom):obj.y * zoom) + Math.floor(i/obj.textureWidth) * (ppr == true?Math.round(obj.textureScale * zoom):obj.textureScale * zoom), `rgba(${normalPixel.r},${normalPixel.g},${normalPixel.b},${normalPixel.a/255})`, gNormalContext, obj.textureScale * zoom);
+			for (let i = 0; i < loops; i++) {
+				let texturePixel = getFromImageDataI(i, objTexture);
+				let normalPixel = getFromImageDataI(i, objNormalTexture);
+				let calculatedTextureX = calculatedObjX + (i%(objIsLight == true?8:obj.textureWidth)) * (objIsLight == true?3:calculatedObjZoom);
+				let calculatedTextureY = calculatedObjY + Math.floor(i/(objIsLight == true?8:obj.textureWidth)) * (objIsLight == true?3:calculatedObjZoom);
+
+				drawPixel(calculatedTextureX, calculatedTextureY, `rgba(${texturePixel.r},${texturePixel.g},${texturePixel.b},${texturePixel.a/255})`,gBaseContext, objZoom);
+				drawPixel(calculatedTextureX, calculatedTextureY, `rgba(${normalPixel.r},${normalPixel.g},${normalPixel.b},${normalPixel.a/255})`, gNormalContext, objZoom);
 			}
 		}else{
 			// write to base canvas using mesh
@@ -183,10 +239,10 @@ function render(isLighting)
 			gNormalContext.fillStyle = 'rgb(0,0,0)';
 			obj.mesh.forEach(face => {
 				gBaseContext.beginPath();
-				gNormalContext.beginPath();``
+				gNormalContext.beginPath();
 				face.forEach(vertex => {
-					gBaseContext.lineTo(cameraX + obj.x + vertex.x, cameraY + obj.y + vertex.y);
-					gNormalContext.lineTo(cameraX + obj.x + vertex.x, cameraY + obj.y + vertex.y);
+					gBaseContext.lineTo(cameraX + obj.x*zoom + vertex.x*zoom, cameraY + obj.y*zoom + vertex.y*zoom);
+					gNormalContext.lineTo(cameraX + obj.x*zoom + vertex.x*zoom, cameraY + obj.y*zoom + vertex.y*zoom);
 				});
 				gBaseContext.fill();
 				gNormalContext.fill();
@@ -200,29 +256,68 @@ function render(isLighting)
 		return;
 	}
 
-	// compute light for each pixel
+	//render light layer
 	let baseImageData = getImageDataFromContext(gBaseContext, gBaseCanvas.width, gBaseCanvas.height),
 	normalImageData = getImageDataFromContext(gNormalContext, gNormalCanvas.width, gNormalCanvas.height);
+	let gLightArray = [];
 	objs.forEach(obj => {
 		if(obj.isLight != true){return;}
-		
+		let gLightCanvas = document.createElement('canvas');
+		gLightCanvas.width = mainCanvas.width;
+		gLightCanvas.height = mainCanvas.height;
+		let gLightContext = gLightCanvas.getContext('2d');
 		for (let i = 0; i < renderCanvas.width * renderCanvas.height; i++){
-			let pixelX = Math.floor(i%renderCanvas.width),
+			let basePixel = getFromImageDataI(i,baseImageData),
+			normalPixel = getFromImageDataI(i, normalImageData),
+			pixelX = Math.floor(i%renderCanvas.width),
 			pixelY = Math.floor(i/renderCanvas.width),
-			lightFalloffAmount = pthag(pixelX - (obj.x + cameraX), pixelY - (obj.y + cameraY)) / obj.lightFalloff;
-			if(lightFalloffAmount > 1 && lightFalloffAmount < 0){return;}
+			relativePixelX = pixelX - (obj.x * zoom + cameraX),
+			relativePixelY = pixelY - (obj.y * zoom + cameraY),
+			distance = pthag(relativePixelX, relativePixelY);
+			// if(distance > obj.lightRadialFalloff){continue;} // if out of the light's area skip pixel
 
-			let basePixel = getFromImageDataI(i, baseImageData),
-			normalPixel = getFromImageDataI(i, normalImageData);
-			drawPixel(pixelX, pixelY,
-			`rgb(
-				${((obj.lightColor.r - (lightFalloffAmount * (obj.lightColor.r - obj.lightFalloffColor.r))) / 255) * basePixel.r},
-				${((obj.lightColor.g - (lightFalloffAmount * (obj.lightColor.g - obj.lightFalloffColor.g))) / 255) * basePixel.g},
-				${((obj.lightColor.b - (lightFalloffAmount * (obj.lightColor.b - obj.lightFalloffColor.b))) / 255) * basePixel.b}
-			)`
-			, renderContext, 1);
+			let radialFalloff = Math.pow(1 - distance, 2)/obj.lightRadialFalloff,
+			relativeAngle = Math.asin(relativePixelX/distance)*180/Math.PI,
+			angularFalloff = smoothStep(obj.lightAngularFalloff*180-90,obj.lightAngularClamp*180-90,relativeAngle+obj.lightDirection);
+
+			// if(Math.random() > 0.9999){renderContext.beginPath();renderContext.fillText(relativePixelX,pixelX,pixelY);renderContext.fill();}
+
+			// drawPixel(pixelX,pixelY,`hsl(${angularVector},0%,${1*radialFalloff*angularFalloff*100}%)`,renderContext,1)
+			// drawPixel(pixelX,pixelY,`hsl(0,0%,${angularFalloff*100}%)`,renderContext,1)
+			drawPixel(pixelX,pixelY,`rgb(${basePixel.r * angularFalloff},${basePixel.g * angularFalloff},${basePixel.b * angularFalloff})`,renderContext,1)
 		}
+		// gLightArray.push(getImageDataFromContext(gLightContext,gLightCanvas.width,gLightCanvas.width));
+		renderContext.putImageData(getImageDataFromContext(gLightContext,gLightCanvas.width,gLightCanvas.height,true),gLightCanvas.width,gLightCanvas.height);
 	});
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    just a few debug things dont worry about it
+
+
+	// objs.forEach(obj => {
+	// 	if(obj.isLight != true){return;}
+		
+	// 	for (let i = 0; i < renderCanvas.width * renderCanvas.height; i++){
+	// 		let pixelX = Math.floor(i%renderCanvas.width),
+	// 		pixelY = Math.floor(i/renderCanvas.width),
+	// 		distanceFromLight = pthag(pixelX - (obj.x * zoom + cameraX), pixelY - (obj.y * zoom + cameraY)),
+	// 		lightRadialFalloffAmount = distanceFromLight / (obj.lightRadialFalloff * zoom);
+	// 		let basePixel = getFromImageDataI(i, baseImageData),
+	// 		normalPixel = getFromImageDataI(i, normalImageData);
+	// 		if(Math.ceil(distanceFromLight) > obj.lightRadialFalloff){
+	// 			drawPixel(pixelX, pixelY,`rgb(${basePixel.r*(globalLighting.r/255)},${basePixel.g*(globalLighting.g/255)},${basePixel.b*(globalLighting.b/255)})`, renderContext, 1);
+	// 			continue;
+	// 		}
+
+	// 		drawPixel(pixelX, pixelY,
+	// 		`rgb(
+	// 			${((obj.lightColor.r - (lightFalloffAmount * (obj.lightColor.r - globalLighting.r))) / 255) * basePixel.r},
+	// 			${((obj.lightColor.g - (lightFalloffAmount * (obj.lightColor.g - globalLighting.g))) / 255) * basePixel.g},
+	// 			${((obj.lightColor.b - (lightFalloffAmount * (obj.lightColor.b - globalLighting.b))) / 255) * basePixel.b}
+	// 		)`
+	// 		, renderContext, 1);
+	// 	}
+	// });
 
 };
 
@@ -258,30 +353,7 @@ mainCanvas.addEventListener("mousemove", (event) => {
 mainCanvas.addEventListener("wheel", (event) => {
 	if(event.deltaY > 100 || event.deltaY < -100){return;}
 	zoom -= event.deltaY/250 * Math.abs(0-zoom);
-	cameraX += event.deltaY/10 * Math.abs(0-zoom);
-	cameraY += event.deltaY/10 * Math.abs(0-zoom);
 	if(zoom < 0.02){
 		zoom = 0.02;
 	}
 }, { passive: true});
-function errMsg(message){
-	function beGone(){
-		element.style.height = '0px';
-		element.style.borderWidth = '0px';
-		setTimeout(function(){
-			element.remove();
-		}, 1000)
-	}
-	let element = document.createElement('span');
-	element.className = 'errorMessage';
-	element.deleteMePlz = true;
-	element.innerHTML = message;
-	element.onclick = function(){beGone();};
-	element.onmouseover = function(){this.deleteMePlz = false; this.style.background = '#000000'};
-	document.querySelector('.errorContainer').appendChild(element);
-	let deleteTimeout = setTimeout(function(){
-		if(element.deleteMePlz == true){
-			beGone();
-		}
-	}, 3000);
-}
