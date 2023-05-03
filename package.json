@@ -1,0 +1,41 @@
+{
+  "name": "stratii",
+  "version": "0.0.1",
+  "description": "2d rendering engine, physics engine, and interface",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c3nn/stratii.git"
+  },
+  "keywords": [
+    "2d",
+    "rendering",
+    "physics",
+    "ui",
+    "stratii",
+    "c3nn",
+    "CC-BY-NC-SA-4.0"
+  ],
+  "author": "c3nn",
+  "license": "CC-BY-NC-SA-4.0",
+  "bugs": {
+    "url": "https://github.com/c3nn/stratii/issues"
+  },
+  "homepage": "https://stratii.c3nn.com/about",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
+    "electron": "^24.1.2"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}

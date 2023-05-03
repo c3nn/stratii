@@ -1,110 +1,195 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200&display=swap');
+@font-face{
+	font-family: "bahnschrift";
+	src: local("bahnschrift"), url("assets/bahnschrift.ttf");
+}
 :root{
-	background: linear-gradient(45deg, hsl(0, 0%, 0%), #271f16);
-	width: 100vw;
-	height: 100vh;
-	user-select: none;
-	--controlsHeight: 0.70;
+	background-color: #000000;
+	--root-bg-gradient: linear-gradient(45deg, #000000, #271f16);
+	background: var(--root-bg-gradient);
+	/* all changed by js */
+	--dark-accent-color: #121212;
+	--accent-color: #444444;
+	--bg-color: #181818;
+	--scale: 1;
+	--ui-border-thickness: 3px;
+	--title-size: calc(12px * var(--scale));
+	--winBarHeight: 25px;
 }
-@keyframes errMsg {
-	0%	{height: 0px; border-width: 0px; margin-top: 0px;}
-	100%{height: 40px; border-width: 10px; margin-top: 10px;}
+::-webkit-scrollbar{
+	width: 0px;
+	height: 0px;
+	background: transparent;
 }
-.errorContainer{
-	z-index: 9999999;
+.material-symbols-rounded{
+	font-size: auto;
+}
+
+#winBar{
 	display: flex;
-	justify-content: left;
-	align-items: flex-end;
-	flex-direction: column;
+	justify-content: space-between;
 	position: fixed;
-	bottom: 5px;
-	right: 5px;
-	width: 100vw;
-	height: auto;
-	pointer-events: none;
-}
-.errorMessage{
-	width: auto;
-	height: 40px;
-	font-size: 30px;
-	border: solid transparent 10px;
-	border-radius: 20px 20px 0px 20px;
-	color: #ffffff;
-	background: #000000cc;
-	font-family: Open Sans; 
-	transition: background 0.3s ease, height 0.3s ease-in, border-width 0.3s ease-in, margin-top 0.3s ease-in;
-	text-align: center;
-	overflow: hidden;
-	animation: errMsg 0.3s;
-	margin-top: 10px;
-	pointer-events: all;
-}
-.mainContainer{
-	position: fixed;
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: var(--winBarHeight);
 	top: 0px;
 	left: 0px;
+	background: var(--bg-color);
+	color: var(--accent-color);
+	backdrop-filter: blur(10px);
+	z-index: 99998;
+	transition: top 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.mainContainer canvas{
-	position: absolute;
-	right: 0px;
-	width: calc(100vw - 400px);
+#winBar div{
+	display: flex;
+}
+.winButton{
+	width: calc(var(--winBarHeight) * 1.5);
+	height: var(--winBarHeight);
+	background: #000000;
+	overflow: hidden;
+	pointer-events: all;
+	background: transparent;
+	transition: background 0.2s ease, color 0.2s ease, top 0.2s ease;
+	border: none;
+	color: var(--accent-color);
+	font-size: calc(var(--winBarHeight) * 0.9) !important;
+}
+.winButton:hover{
+	background: var(--accent-color);
+	color: var(--bg-color);
+}
+
+@keyframes intro {
+	0%{letter-spacing: 3vh;}
+	100%{letter-spacing: 0vh;}
+}
+@keyframes introMid {
+	0%{letter-spacing: 0vh;}
+	100%{letter-spacing: -1vh;}
+}
+@keyframes introEnd {
+	0%{letter-spacing: -1vh;}
+	100%{letter-spacing: 0vh;}
+}
+.mainCanvas{
+	left: 0px;
+	top: 0px;
+	width: 100%;
 	height: 100%;
 	background: transparent;
 	image-rendering: pixelated;
+	user-select: none;
 }
-.controlsContainer, .objectsContainer{
+.ui{
 	position: absolute;
-	background: rgba(0, 0, 0, 0.2);
-	right: auto;
 	left: 0px;
-	width: 400px;
-}
-.controlsContainer{
-	height: calc(100vh * var(--controlsHeight));
-}
-.controlsContainer *{
-	color: #ffffff;
-	font-size: 25px;
-	font-family: Open Sans;
-}
-.controlsContainer .right{
-	position: absolute;
-	right: 2px;
-}
-.controlsContainer h1{
-	margin-top: 2px;
-	margin-bottom: 0px;
-	text-decoration: underline;
-}
-.controlsContainer input[type = button]{
-	background-color: rgba(255, 255, 255, 0.1);
-	margin-top: 2px;
-	border: none;
-	border-radius: 3px;
-}
-.controlsContainer .canvasTypeSelector{
+	bottom: 0px;
+	width: 100%;
+	height: 100svh;
+	margin: 0px;
+	padding: 0px;
+	background: var(--bg-color);
+	overflow: hidden;
+	pointer-events: all;
+	color: var(--accent-color);
 	display: flex;
 	flex-direction: column;
-	justify-content: space-around;
-	width: 30px;
-	height: auto;
-	bottom: 35px;
+	align-items: center;
+	font-family: bahnschrift;
 }
-.controlsContainer .canvasTypeSelector input{
-	width: 30px;
-	height: 30px;
-	background-image: var(--img);
-	background-repeat: no-repeat;
-	background-size: 24px;
-	background-position-x: 3px;
-	background-position-y: 3px;
+.hSplit, .vSplit{
 	position: relative;
-	image-rendering: pixelated;
+	margin: 0px;
+	padding: 0px;
+	background: transparent;
+	border-right: solid var(--ui-border-thickness) var(--accent-color);
+	height: 100%;
+	width: 100%; /* both 100% so it's evenly spaced */
+	overflow: auto;
+	padding-left: calc(2px * var(--scale));
 }
-.objectsContainer{
-	height: calc(100vh - 100vh * var(--controlsHeight));
-	top: auto;
+.vSplit{
+	border: none;
+	border-bottom: solid var(--ui-border-thickness) var(--accent-color);
+}
+.hSplit:last-child, .vSplit:last-child, .mainContainer:last-child{
+	border: none;
+}
+.hSplit:has(.vSplit), .vSplit:has(.hSplit){
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0px;
+	overflow: hidden;
+}
+.vSplit:has(.hSplit){
+	flex-direction: row;
+}
+:is(.vSplit, .hSplit) .data-title{
+	position: absolute;
+	background: var(--accent-color);
+	color: var(--bg-color);
+	left: 0px;
 	bottom: 0px;
+	width: 100%;
+	font-size: var(--title-size);
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
+	transition: width 0.1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+:is(.vSplit, .hSplit):has(> .flex) .data-title{
+	height: calc(50% - (36px * var(--scale)));
+	font-size: calc(var(--title-size) * 1.5);
+}
+:is(.vSplit, .hSplit) .indent{
+	border-left: solid var(--ui-border-thickness) var(--accent-color);
+	padding-left: calc(2px * var(--scale));
+}
+:is(.vSplit, .hSplit) span{
+	font-size: calc(20px * var(--scale));
+}
+:is(.vSplit, .hSplit) .transparentSpan{
+	color: var(--accent-color);
+	font-family: JetBrains mono;
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+}
+:is(.vSplit, .hSplit) .flex{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+}
+:is(.vSplit, .hSplit) .flex :is(.playbackButton,.playbackInput){
+	width: calc(100px * var(--scale));
+	height: auto;
+	background: transparent;
+	color: var(--accent-color);
+	border: none;
+	font-size: calc(70px * var(--scale));
+	text-shadow: 0px 0px 2px var(--accent-color);
+	transition: text-shadow 0.1s ease-out;
+}
+:is(.vSplit, .hSplit) .flex .playbackButton:hover{
+	text-shadow: 0px 0px 10px var(--accent-color);
+}
+:is(.vSplit, .hSplit) .flex :is(.playbackButton,.playbackInput):first-child{
+	text-align: right;
+	width: 100%;
+}
+:is(.vSplit, .hSplit) .flex :is(.playbackButton,.playbackInput):last-child{
+	text-align: left;
+	width: 100%;
+}
+:is(.vSplit, .hSplit) .flex .playbackInput{
+	font-size: calc(20px * var(--scale));
+	direction: rtl;
+	text-decoration: underline;
 }
