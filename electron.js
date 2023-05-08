@@ -4,6 +4,7 @@ const { ipcRenderer } = require('electron');
 const ipc = ipcRenderer;
 
 winBar.style.display = 'flex';
+cssVar('winBarIsOpen', 1); // todo
 
 winClose.addEventListener("click", () => {
 	ipc.send('closeApp');

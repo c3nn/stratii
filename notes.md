@@ -1,25 +1,42 @@
-# Notes
+# Notes ################
 color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 
+    _____________________________________________________________
+    |                   |                   |                   |
+    |                   |                   | vertical split    |
+    | horizontal split  | horizontal split  |-------------------|
+    |                   |                   | vertical split    |
+    |                   |                   |                   |
+    ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
-###### TODO ######
+# TODO ################
 
-# TODO visual
-- add parallax to objs
-- add bezier curves to mesh objs
+#### legend
+- ? = cant / dont really need/want to
+- none = would be very nice to have
+- ! = yeah we really need this
+- !! = OH GOD FIX RIGHT NOW
 
-# TODO phys
-- buncha stuff
+## TODO visual
+- ? add parallax to objs
+- ? add bezier curves to mesh objs
 
-# TODO misc.
-- fix function loading from url
+## TODO phys
+- momentum just being added when hitting ground... IDK WHYYYYY
+- buncha stuff, yeah yeah...
+
+## TODO misc.
+- ? fix function loading from url
 - add saving to/from cookies
-- FireFox support?
+- ? FireFox support
+- ! set --winBarIsOpen: 1; when using electron
 
-# TODO ui
-- add border resizing to main ui
-- convert resized ui elements back into % from px
+## TODO ui
+- ? ms control w/ phys & render tics
+- ? convert resized ui elements back into % from px
 - adding obj settings
-- fix camera moving when moving obj
-- fix the camera zooming... don't even ask, idk
+- ! fix the camera zooming... don't even ask, idk
+- fix extra momentum when droping objs
 - add useRect obj move support
+- ? add tabs (like the Unity Editor)
+- "[/] for more keybinds"

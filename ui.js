@@ -1,4 +1,6 @@
-const loadingText = document.querySelector('#loadingText');
+const loadingText = document.querySelector('#loadingText'),
+$ = function(selector){return document.querySelector(selector);},
+$all = function(selector){return document.querySelectorAll(selector);};
 var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 if(isFirefox == true && hasURLParam('ffox') == false){
 	alert("attention: you are useing firefox right? well stratii doesn't support firefox so things may be (will be very) broken. I recommend operaGX but chrome is ok too I guess. (if you want to stop seeing this message just type '?ffox' after the domain. EX: 'example.com/?ffox' )")
@@ -7,34 +9,40 @@ if(isFirefox == true && hasURLParam('ffox') == false){
 var isGlobalMouseDown = false;
 window.addEventListener("mousedown", () => { isGlobalMouseDown = true; });
 window.addEventListener("mouseup", () => { isGlobalMouseDown = false; });
+function userSelectOff(){
+	$(':root').style.userSelect = 'none';
+}
+function userSelectOn(){
+	$(':root').style.userSelect = 'auto';
+}
 
-// mouse movement camera control
+var selectedMoveObjIndex = -1, // polish up
+selectedObjIndex = 0; // todo
 
 var mouseMoveStartX,
 mouseMoveStartY,
-mouseMoveCamStartX,
-mouseMoveCamStartY,
-isCanvasMouseDown = false,
-isCanvasMiddleMouseDown = false;
+mouseMoveCamStartX = null,
+mouseMoveCamStartY;
+function mouseMoveCamFunct(){
+	if(selectedMoveObjIndex != -1){return;}
+	s.cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX);
+	s.cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY);
+}
 mainCanvas.addEventListener("mousedown", (event) => {
-	isCanvasMouseDown = true;
-	if(event.button == 1){
-		isCanvasMiddleMouseDown = true;
-	}
 	mouseMoveStartX = event.clientX;
 	mouseMoveStartY = event.clientY;
 	mouseMoveCamStartX = s.cameraX;
 	mouseMoveCamStartY = s.cameraY;
+	userSelectOff();
+	window.addEventListener("mousemove", mouseMoveCamFunct);
 });
-mainCanvas.addEventListener("mouseup", (event) => {
-	isCanvasMouseDown = false;
-	isCanvasMiddleMouseDown = false;
+window.addEventListener("mouseup", (event) => {
+	if(mouseMoveCamStartX != null){
+		window.removeEventListener('mousemove', mouseMoveCamFunct);
+		userSelectOn();
+	}
+	mouseMoveCamStartX = null;
 });
-mainCanvas.addEventListener("mousemove", (event) => {
-	if(isCanvasMouseDown != true || selectedObjIndex != -1){return;}
-	s.cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX);
-	s.cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY);
-})
 mainCanvas.addEventListener("wheel", (event) => {
 	if(event.deltaY > 100 || event.deltaY < -100 || (s.cameraZoom == 0.02 && event.deltaY >= 0)){return;}
 	s.cameraZoom -= event.deltaY/250 * Math.abs(0-s.cameraZoom);
@@ -47,11 +55,14 @@ function startUi(){ // run after webpage loaded
 	loadingText.innerHTML = 'starting UI...';
 
 	// electron extras
+	loadingText.innerHTML = 'applying electron JS...';
+
 	document.querySelector('#winSmaller').addEventListener('click', () => {
-		let winBar = document.querySelector('#winBar'),
-		winSmaller = document.querySelector('#winBar .lastDiv #winSmaller');
+		let winBar = $('#winBar'),
+		winSmaller = $('#winBar .lastDiv #winSmaller');
 		
 		if(winSmaller.style.position != 'fixed'){
+			cssVar('winBarIsOpen', 0);
 			winBar.style.top = 'calc(var(--winBarHeight) * -1)';
 			setTimeout(() => {
 				winSmaller.style.top = 'var(--winBarHeight)';
@@ -63,27 +74,76 @@ function startUi(){ // run after webpage loaded
 			winSmaller.style.top = '0px';
 			setTimeout(() => {
 				winBar.style.top = '0px';
+				cssVar('winBarIsOpen', 1);
 				winSmaller.style.position = 'relative';
 				winSmaller.innerHTML = 'Expand_less';
 				winSmaller.style.borderBottomLeftRadius = '0px';
 			}, 200)
 		}
 	});
-	
-	// all elements that need extra js
-	loadingText.innerHTML = 'applying layout JS...';
 
-	//! document.querySelector('.mainContainer').style.transition = 'height 0.6s cubic-bezier(0.075, 0.82, 0.165, 1)';
+	loadingText.innerHTML = 'applying layout JS...';
 	
 	function canvasResize(){
 		mainCanvas.height = mainCanvas.clientHeight;
 		mainCanvas.width = mainCanvas.clientWidth;
+		renderTic()
 	}
 	canvasResize();
 	new ResizeObserver(canvasResize).observe(mainCanvas)
-	
-	document.querySelectorAll(':is(.vSplit, .hSplit)[data-title]').forEach(element => {
-		let isVSplit = element.className.includes('vSplit'),
+
+	let mouseDownFunct = function(element, isVSplit){
+		userSelectOff();
+		let startX = window.event.clientX,
+		startY = window.event.clientY,
+		startWidth = element.clientWidth,
+		startHeight = element.clientHeight;
+		let mousemoveFunct = function(){
+			let newWidth = startWidth + (window.event.clientX - startX),
+			newHeight = startHeight + (window.event.clientY - startY);
+			if(newWidth < 10 || newHeight < 10){return;}
+
+			element.style.flex = `0 0 ${(isVSplit?newHeight:newWidth)}px`;
+		};
+		window.addEventListener("mousemove", mousemoveFunct);
+		window.addEventListener("mouseup", () => {
+			userSelectOn();
+			window.removeEventListener("mousemove", mousemoveFunct);
+		}, {once: true});
+	};
+	$all(':is(.vSplit, .hSplit)').forEach(element => {
+		if(element.matches('*:last-child')){return;}
+		let isVSplit = element.matches('.vSplit');
+		var passesY,
+		passesX;
+		element.addEventListener('mousemove', event => {
+			passesY = (event.offsetY + s.uiBorderThickness > element.clientHeight);
+			passesX = (event.offsetX + s.uiBorderThickness > element.clientWidth);
+			if(isVSplit == true){
+				if(passesY){
+					element.style.cursor = 'n-resize';
+				}else{
+					element.style.cursor = 'auto';
+				}
+			}else{
+				if(passesX){
+					element.style.cursor = 'e-resize';
+				}else{
+					element.style.cursor = 'auto';
+				}
+			}
+		});
+		element.addEventListener('mousedown', event => {
+			if(isVSplit == true){
+				if(!passesY){return;}
+			}else{
+				if(!passesX){return;}
+			}
+			mouseDownFunct(element, isVSplit);
+		})
+	});
+	$all(':is(.vSplit, .hSplit)[data-title]').forEach(element => {
+		let isVSplit = element.matches('.vSplit'),
 		el = document.createElement('span');
 		el.className = 'data-title';
 		el.innerHTML = element.dataset.title;
@@ -99,69 +159,97 @@ function startUi(){ // run after webpage loaded
 		let DOMel = element.appendChild(el);
 		if(element.matches('*:last-child')){return;} // skips if it's the last child
 
-		DOMel.style.cursor = (isVSplit?"e-resize":"n-resize");
+		DOMel.style.cursor = (isVSplit?"n-resize":"e-resize");
 		DOMel.addEventListener("mousedown", () => {
-			let startX = window.event.clientX,
-			startY = window.event.clientY,
-			startWidth = element.clientWidth,
-			startHeight = element.clientHeight;
-			let mousemoveFunct = function(){
-				let newWidth = startWidth + (window.event.clientX - startX),
-				newHeight = startHeight + (window.event.clientY - startY);
-				if(isVSplit == true && newWidth > 10){
-					element.style.flex = `0 0 ${newWidth}px`;
-				}else if(isVSplit == false && newHeight > 10){
-					element.style.flex = `0 0 ${newHeight}px`;
-				}
-			};
-			window.addEventListener("mousemove", mousemoveFunct);
-			window.addEventListener("mouseup", () => {
-				window.removeEventListener("mousemove", mousemoveFunct);
-			}, {once: true});
+			mouseDownFunct(element, isVSplit);
 		});
 	});
 
-	document.querySelectorAll('.jsClearIntervalPhysics').forEach(element => {
+	let selObjMouseX = 0,
+	selObjMouseY = 0;
+	mainCanvas.addEventListener('mousedown', event => {
+		if(event.button == 1){return;}
+
+		objs.forEach((obj, index) => {
+			if(obj.phys.useRect == true){
+				// todo
+			}else{
+				if(pthag(ctxCords(event.offsetX) - obj.x, ctyCords(event.offsetY) - obj.y) < obj.phys.radius){
+					selectedObjIndex = index;
+					selectedMoveObjIndex = index;
+					obj.phys.xMomentum = 0;
+					obj.phys.yMomentum = 0;
+				}
+			}
+		});
+	});
+	mainCanvas.addEventListener('mousemove', event => {
+		if(selectedMoveObjIndex == -1 || event.button == 1){return;}
+		
+		let obj = objs[selectedMoveObjIndex];
+
+		obj.x = ctxCords(event.offsetX);
+		obj.y = ctyCords(event.offsetY);
+		obj.phys.xMomentum = 0;
+		obj.phys.yMomentum = 0;
+
+		selObjMouseMovmentX = event.movementX;
+		selObjMouseMovmentY = event.movementY;
+	});
+	mainCanvas.addEventListener('mouseup', event => {
+		if(selectedMoveObjIndex == -1){return;}
+
+		let obj = objs[selectedMoveObjIndex];
+		selectedMoveObjIndex = -1;
+
+		obj.phys.xMomentum = ctScale(selObjMouseMovmentX);
+		obj.phys.yMomentum = ctScale(selObjMouseMovmentY);
+	});
+
+	$all('.jsClearIntervalPhysics').forEach(element => {
 		element.addEventListener('click', clearPhysicsTic);
 	});
-	document.querySelectorAll('.jsStartIntervalPhysics').forEach(element => {
+	$all('.jsStartIntervalPhysics').forEach(element => {
 		element.addEventListener('click', startPhysicsTic);
 	});
-	document.querySelectorAll('.jsStepPhysics').forEach(element => {
+	$all('.jsStepPhysics').forEach(element => {
 		element.addEventListener('click', physicsTic);
 	});
-	document.querySelectorAll('.jsShowPhysNum').forEach(element => {
+	let numFormatter = Intl.NumberFormat('en', { notation: 'compact' });
+	$all('.jsShowPhysNum').forEach(element => {
 		setInterval(() => {
-			element.innerHTML = physTicsRan;
+			element.innerHTML = numFormatter.format(physTicsRan);
 		}, 20);
 	})
 
-	document.querySelectorAll('.jsClearIntervalRender').forEach(element => {
+	$all('.jsClearIntervalRender').forEach(element => {
 		element.addEventListener('click', clearRenderTic);
 	});
-	document.querySelectorAll('.jsStartIntervalRender').forEach(element => {
+	$all('.jsStartIntervalRender').forEach(element => {
 		element.addEventListener('click', startRenderTic);
 	});
-	document.querySelectorAll('.jsStepRender').forEach(element => {
+	$all('.jsStepRender').forEach(element => {
 		element.addEventListener('click', renderTic);
 	});
-	document.querySelectorAll('.jsShowFramesRendered').forEach(element => {
+	$all('.jsShowFramesRendered').forEach(element => {
 		setInterval(() => {
-			element.innerHTML = framesRendered;
+			element.innerHTML = numFormatter.format(framesRendered);
 		}, 20)
 	})
 
-	document.querySelectorAll(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
-		element.style.height = element.dataset.height;
+	$all(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
+		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
+		element.style.flex = `0 0 ${element.dataset.height}`;
 	});
-	document.querySelectorAll(':is(.hSplit, .vSplit)[data-width]').forEach(element => {
-		element.style.width = element.dataset.width;
+	$all(':is(.hSplit, .vSplit)[data-width]').forEach(element => {
+		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
+		element.style.flex = `0 0 ${element.dataset.width}`;
 	});
-	
+
 
 	if(hasURLParam('lolcat')){
 		let lolCatTimerGG = 0;
-		setInterval(function(){
+		setInterval(() => {
 			cssVar('accent-color', `hsl(${lolCatTimerGG},100%,50%)`);
 			lolCatTimerGG += 5;
 			if(lolCatTimerGG > 360){
@@ -170,55 +258,14 @@ function startUi(){ // run after webpage loaded
 		}, 50);
 	}
 
-	setTimeout(function(){
-		document.querySelector('#loadingUi').style.height = '0px';
-		document.querySelector('#loadingUi').style.opacity = '0';
-		setTimeout(function(){
-			document.querySelector('#loadingUi').remove();
+	setTimeout(() => {
+		$('#loadingUi').style.height = '0px';
+		$('#loadingUi').style.opacity = '0';
+		setTimeout(() => {
+			$('#loadingUi').remove();
 		}, 5000)
 	}, (hasURLParam('skipIntro') == true?0:2500));
 	
 	loadingText.innerHTML = '';
-	document.querySelector('#stratiiIntroLogo').style.color = 'var(--accent-color)';
+	$('#stratiiIntroLogo').style.color = 'var(--accent-color)';
 }
-
-var selectedObjIndex = -1,
-selObjMouseX,
-selObjMouseY;
-mainCanvas.addEventListener('mousedown', event => {
-	if(event.button == 1){return;}
-
-	objs.forEach((obj, index) => {
-		if(obj.phys.useRect == true){
-
-		}else{
-			if(pthag(ctxCords(event.clientX) - obj.x, ctyCords(event.clientY) - obj.y) < obj.phys.radius){
-				selectedObjIndex = index;
-				obj.phys.xMomentum = 0;
-				obj.phys.yMomentum = 0;
-			}
-		}
-	});
-});
-mainCanvas.addEventListener('mousemove', event => {
-	if(isCanvasMouseDown == false || event.button == 1 || selectedObjIndex == -1){return;}
-	
-	let obj = objs[selectedObjIndex];
-
-	obj.x = ctxCords(event.clientX);
-	obj.y = ctyCords(event.clientY);
-	obj.phys.xMomentum = 0;
-	obj.phys.yMomentum = 0;
-
-	selObjMouseMovmentX = event.movementX;
-	selObjMouseMovmentY = event.movementY;
-});
-mainCanvas.addEventListener('mouseup', event => {
-	if(selectedObjIndex == -1){return;}
-
-	let obj = objs[selectedObjIndex];
-	selectedObjIndex = -1;
-
-	obj.phys.xMomentum = ctScale(selObjMouseMovmentX);
-	obj.phys.yMomentum = ctScale(selObjMouseMovmentY);
-});

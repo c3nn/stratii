@@ -1,4 +1,4 @@
-const mainCanvas = document.querySelector('#canvas'),
+const mainCanvas = document.querySelector('#mainCanvas'),
 mainContext = mainCanvas.getContext('2d'),
 lightTexture = [
 	0,0,0,0, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,0,
@@ -21,31 +21,31 @@ lightTexture = [
 ];
 mainContext.imageSmoothingEnabled = false;
 
-var s = {}; // save
-s.canvasType = 'base',
-s.gravity = 0.1;
-s.cameraX = 10;
-s.cameraY = 10;
-s.cameraZoom = 1;
-s.showHitboxes = true;
-s.floorHeight = 1000;
-s.floorThickness = 100;
-s.floorColor = {r:250, g:255, b:255, a: 0.55};
-s.floorBouncyness = 0.8;
-s.floorEnabled = true,
-s.globalLighting = {r:100, g:100, b:100};
-s.background = {r:20, g:20, b:20};
-s.backgroundEnabled = false;
-s.mainUiHeight = 500;
-s.mainUiOpeningArea = 50;
-s.uiBgColor = {r:24, g:24, b:24};
-s.uiDarkAccentColor = {r:0, g:0, b:0, a: 0.55};
-s.uiAccentColor = {r:255, g:255, b:255, a: 0.55};
-s.uiTitleSize = 12;
-s.physicsIntervalRunning = true;
-s.physicsIntervalTime = 10;
-s.renderIntervalRunning = true;
-s.renderIntervalTime = 10;
+var s = {
+	canvasType: 'base',
+	gravity: 0.1,
+	cameraX: 100,
+	cameraY: 50,
+	cameraZoom: 0.3,
+	showHitboxes: true,
+	floorHeight: 1000,
+	floorThickness: 100,
+	floorColor: {r:250, g:255, b:255, a: 0.55},
+	floorBouncyness: 0.8,
+	floorEnabled: true,
+	globalLighting: {r:100, g:100, b:100},
+	background: {r:20, g:20, b:20},
+	backgroundEnabled: false,
+	uiBorderThickness: 3,
+	uiBgColor: {r:24, g:24, b:24},
+	uiDarkAccentColor: {r:0, g:0, b:0, a: 0.55},
+	uiAccentColor: {r:255, g:255, b:255, a: 0.55},
+	uiTitleSize: 12,
+	physicsIntervalRunning: true,
+	physicsIntervalTime: 10,
+	renderIntervalRunning: true,
+	renderIntervalTime: 10,
+};
 var framesRendered = 0,
 physTicsRan = 0;
 objs = [{
@@ -253,7 +253,8 @@ function cssVar(name, val = null, obj = ':root'){
 	}
 }
 function updateCSSVars(){
-	cssVar('title-size', `${s.uiTitleSize}px`)
+	cssVar('title-size', `${s.uiTitleSize}px`);
+	cssVar('ui-border-thickness', `${s.uiBorderThickness}px`);
 	cssVar('bg-color', colorObjToRGB(s.uiBgColor));
 	cssVar('dark-accent-color', colorObjToRGB(s.uiDarkAccentColor));
 	cssVar('accent-color', colorObjToRGB(s.uiAccentColor));
@@ -279,6 +280,10 @@ function ctyCords(y, camY = s.cameraY, camZoom = s.cameraZoom){
 }
 function ctScale(num, camZoom = s.cameraZoom){
 	return num / camZoom;
+}
+function warnMsg(msg, redOutline = false, formalError = null){
+	// let element = document.createElement('span'); todo // have another section for the formal error
+	console.warn(`warning: ${msg}` + (formalError != null?` /// Formal Error: ${formalError}`:''));
 }
 
 function renderGround(context, canvasWidth, thickness, height, color = {r,g,b,a}, camY, camZoom)
