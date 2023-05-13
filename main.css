@@ -13,7 +13,8 @@
 	--ui-border-thickness: 3px;
 	--title-size: 12px;
 	--winBarIsOpen: 0;
-	--winBarHeight: calc(25px * var(--winBarIsOpen));
+	--winBarHeightTrue: 25px;
+	--winBarHeight: calc(var(--winBarHeightTrue) * var(--winBarIsOpen));
 	--status-bar-height: 13px;
 	
 	background: var(--bg-color);
@@ -34,7 +35,7 @@
 	justify-content: space-between;
 	position: fixed;
 	width: 100%;
-	height: var(--winBarHeight);
+	height: var(--winBarHeightTrue);
 	top: 0px;
 	left: 0px;
 	background: var(--dark-accent-color);
@@ -47,8 +48,8 @@
 	display: flex;
 }
 .winButton{
-	width: calc(var(--winBarHeight) * 1.5);
-	height: var(--winBarHeight);
+	width: calc(var(--winBarHeightTrue) * 1.5);
+	height: var(--winBarHeightTrue);
 	background: #000000;
 	overflow: hidden;
 	pointer-events: all;
@@ -56,7 +57,7 @@
 	transition: background 0.2s ease, color 0.2s ease, top 0.2s ease;
 	border: none;
 	color: var(--accent-color);
-	font-size: calc(var(--winBarHeight) * 0.9) !important;
+	font-size: calc(var(--winBarHeightTrue) * 0.9) !important;
 }
 .winButton:hover{
 	background: var(--accent-color);

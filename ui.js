@@ -63,12 +63,12 @@ function startUi(){ // run after webpage loaded
 		
 		if(winSmaller.style.position != 'fixed'){
 			cssVar('winBarIsOpen', 0);
-			winBar.style.top = 'calc(var(--winBarHeight) * -1)';
+			winBar.style.top = 'calc(var(--winBarHeightTrue) * -1)';
 			setTimeout(() => {
-				winSmaller.style.top = 'var(--winBarHeight)';
+				winSmaller.style.top = 'var(--winBarHeightTrue)';
 				winSmaller.style.position = 'fixed';
 				winSmaller.innerHTML = 'Expand_more';
-				winSmaller.style.borderBottomLeftRadius = 'calc(var(--winBarHeight) * 0.4)';
+				winSmaller.style.borderBottomLeftRadius = 'calc(var(--winBarHeightTrue) * 0.4)';
 			}, 600)
 		}else{
 			winSmaller.style.top = '0px';
