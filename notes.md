@@ -30,9 +30,10 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 - add saving to/from cookies
 - ? FireFox support
 - ! set --winBarIsOpen: 1; when using electron
+- Mar10 day, March 10th easter egg (Super Stratii Maker)
 
 ## TODO ui
-- ? ms control w/ phys & render tics
+- ? polish ms control w/ phys & render tics
 - ? convert resized ui elements back into % from px
 - adding obj settings
 - ! fix the camera zooming... don't even ask, idk
@@ -40,3 +41,7 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 - add useRect obj move support
 - ? add tabs (like the Unity Editor)
 - "[/] for more keybinds"
+
+## TODO Git
+- do dependencies
+- build v0.0.2

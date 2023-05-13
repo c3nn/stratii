@@ -62,6 +62,9 @@
 	background: var(--accent-color);
 	color: var(--bg-color);
 }
+*[data-jetbrains]{
+	font-family: Jetbrains mono;
+}
 
 @keyframes intro {
 	0%{letter-spacing: 3vh;}

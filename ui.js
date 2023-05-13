@@ -94,6 +94,7 @@ function startUi(){ // run after webpage loaded
 
 	let mouseDownFunct = function(element, isVSplit){
 		userSelectOff();
+		let minSpace = 10;
 		let startX = window.event.clientX,
 		startY = window.event.clientY,
 		startWidth = element.clientWidth,
@@ -101,7 +102,7 @@ function startUi(){ // run after webpage loaded
 		let mousemoveFunct = function(){
 			let newWidth = startWidth + (window.event.clientX - startX),
 			newHeight = startHeight + (window.event.clientY - startY);
-			if(newWidth < 10 || newHeight < 10){return;}
+			if((isVSplit?newHeight < minSpace:newWidth < minSpace) || (isVSplit?newHeight > element.parentElement.clientHeight-minSpace:newWidth > element.parentElement.clientWidth-minSpace)){return;}
 
 			element.style.flex = `0 0 ${(isVSplit?newHeight:newWidth)}px`;
 		};
@@ -148,9 +149,8 @@ function startUi(){ // run after webpage loaded
 		el.className = 'data-title';
 		el.innerHTML = element.dataset.title;
 		element.addEventListener("scroll", () => {
-			el.style.left = `${element.scrollLeft}px`
 			el.style.bottom = `-${element.scrollTop}px`
-			if(element.scrollTop == 0){
+			if(element.scrollTop == 0 && element.scrollLeft == 0){
 				el.style.width = '100%';
 			}else{
 				el.style.width = '0%';
@@ -165,8 +165,8 @@ function startUi(){ // run after webpage loaded
 		});
 	});
 
-	let selObjMouseX = 0,
-	selObjMouseY = 0;
+	let selObjMouseOffsetX = 0,
+	selObjMouseOffsetY = 0;
 	mainCanvas.addEventListener('mousedown', event => {
 		if(event.button == 1){return;}
 
