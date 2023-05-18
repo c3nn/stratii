@@ -1,8 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200&display=swap');
+@font-face {
+	font-family: "materialIcons";
+	src: local("Material Symbols Rounded"), url("assets/googleMaterialIcons.woff2");
+	font-display: swap;
+}
+.symbol{
+	font-family: "materialIcons" !important;
+}
+@font-face {
+	font-family: "Open Sans";
+	src: local("Opan Sans"), url("assets/OpenSans.ttf");
+	font-display: swap;
+}
+@font-face {
+	font-family: "JetBrains Mono";
+	src: local("JetBrains Mono"), url("assets/JetBrainsMono.ttf");
+	font-display: swap;
+}
 @font-face{
 	font-family: "bahnschrift";
 	src: local("bahnschrift"), url("assets/bahnschrift.ttf");
+	font-display: swap;
 }
 :root{
 	background-color: #000000;
@@ -25,6 +42,7 @@
 	width: 0px;
 	height: 0px;
 	background: transparent;
+	display: none;
 }
 .material-symbols-rounded{
 	font-size: auto;
@@ -65,6 +83,30 @@
 }
 *[data-jetbrains]{
 	font-family: Jetbrains mono;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+	#loadingUi, #loadingUi *{
+		animation: none !important;
+		transition: opacity 1s linear !important;
+	}
+	.keybindsOverlay{
+		transition: opacity var(--duration) linear !important;
+	}
+	.keybindsOverlay:not([data-show="true"]){
+		transition: opacity var(--duration) linear, height 0s linear var(--duration), bottom 0s linear var(--duration) !important;
+	}
+}
+@media (prefers-contrast: more) {
+	.transparentSpan{
+		opacity: 1 !important;
+		color: var(--accent-color);
+		z-index: 1;
+	}
+	.statusBar *{
+		opacity: 1 !important;
+	}
 }
 
 @keyframes intro {
@@ -125,20 +167,18 @@
 	height: 100%;
 	width: 100%; /* both 100% so it's evenly spaced */
 	overflow: auto;
-	padding-left: 2px;
 }
 .vSplit{
 	border: none;
 	border-bottom: solid var(--ui-border-thickness) var(--dark-accent-color);
 }
-.hSplit:last-child, .vSplit:last-child, .mainContainer:last-child{
+.hSplit:last-of-type, .vSplit:last-of-type{
 	border: none;
 }
 .hSplit:has(.vSplit), .vSplit:has(.hSplit){
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding: 0px;
 	overflow: hidden;
 }
 .vSplit:has(.hSplit){
@@ -210,4 +250,34 @@
 	font-size: 20px;
 	direction: rtl;
 	text-decoration: underline;
+}
+.keybindsOverlay{
+	--timingFunc: cubic-bezier(.1,.8,0,1.05);
+	--duration: 0.7s;
+	position: absolute;
+	left: 15%;
+	bottom: 10%;
+	width: 70%;
+	height: 80%;
+	outline: solid var(--ui-border-thickness) var(--accent-color);
+	background: var(--dark-accent-color);
+	opacity: 1;
+	transition: opacity var(--duration) var(--timingFunc), height var(--duration) var(--timingFunc), bottom var(--duration) var(--timingFunc);
+}
+.keybindsOverlay:not([data-show="true"]){
+	height: 0px;
+	opacity: 0;
+	bottom: 5%;
+	user-select: none;
+	pointer-events: none;
+}
+.keybindsOverlay span:not(.data-title){
+	position: relative;
+	border-color: var(--accent-color);
+	transition: top var(--duration) var(--timingFunc);
+	top: 0px;
+}
+.keybindsOverlay:not([data-show="true"]) span:not(.data-title){
+	top: 100px;
+	transition-delay: var(--duration);
 }

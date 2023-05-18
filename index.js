@@ -80,9 +80,9 @@ objs = [{
 			],
 			normal: [
 				0,0,0,0,		87,229,255,1,		152, 231, 255, 1,	0,0,0,0,
-				10,142,255,1,	81, 142, 255, 1,	153,128,255,1,	217,141,255,1,
-				7,76,255,1,	76,75,255,1,		158,75,255,1,		202,76,255,1,
-				0,0,0,0,		70,5,255,1,		125,5,255,1,		0,0,0,0,
+				10,142,255,1,	81, 142, 255, 1,	153,128,255,1,		217,141,255,1,
+				7,76,255,1,		76,75,255,1,		158,75,255,1,		202,76,255,1,
+				0,0,0,0,		70,5,255,1,			125,5,255,1,		0,0,0,0,
 			],
 			width: 4,
 			height: 4,
@@ -283,6 +283,7 @@ function ctScale(num, camZoom = s.cameraZoom){
 }
 function warnMsg(msg, redOutline = false, formalError = null){
 	// let element = document.createElement('span'); todo // have another section for the formal error
+	// todo
 	console.warn(`warning: ${msg}` + (formalError != null?` /// Formal Error: ${formalError}`:''));
 }
 
@@ -333,7 +334,7 @@ function renderTic()
 	if(s.showHitboxes == true){
 		objs.forEach((obj, index) => {
 			mainContext.beginPath();
-			let color = (index/objs.length)*360
+			let color = (index/objs.length)*360;
 			mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
 			mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
 			if(obj.phys.useRect == true){
@@ -430,6 +431,8 @@ function startMain()
 		document.querySelector('#devmenu').style.display = 'block';
 		setInterval(() => {document.querySelector('#objsTEST').innerHTML = JSON.stringify(objs);}, 100)
 		setInterval(() => {document.querySelector('#sTEST').innerHTML = JSON.stringify(s);}, 100)
+	}else{
+		document.querySelector('#devmenu').remove();
 	}
 	if(getURLHash() != null){
 		loadingText.innerHTML = 'restoring old session...';

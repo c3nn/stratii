@@ -1,9 +1,17 @@
 const loadingText = document.querySelector('#loadingText'),
 $ = function(selector){return document.querySelector(selector);},
 $all = function(selector){return document.querySelectorAll(selector);};
-var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
+prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+prefersContrastMore = window.matchMedia("(prefers-contrast: more)").matches;
 if(isFirefox == true && hasURLParam('ffox') == false){
 	alert("attention: you are useing firefox right? well stratii doesn't support firefox so things may be (will be very) broken. I recommend operaGX but chrome is ok too I guess. (if you want to stop seeing this message just type '?ffox' after the domain. EX: 'example.com/?ffox' )")
+}
+if(prefersContrastMore == true){
+	s.uiAccentColor = {r: 255,g: 255,b: 255};
+	s.uiBgColor = {r: 0,g: 0,b: 0};
+	s.uiDarkAccentColor = {r: 70,g: 70,b: 70};
+	updateCSSVars();
 }
 
 var isGlobalMouseDown = false;
@@ -171,14 +179,25 @@ function startUi(){ // run after webpage loaded
 		if(event.button == 1){return;}
 
 		objs.forEach((obj, index) => {
+			// maybe need bounding offset if it ever exists?
+			let localX = ctxCords(event.offsetX) - obj.x,
+				localY = ctyCords(event.offsetY) - obj.y;
+			let setObj = function(){
+				selObjMouseOffsetX = localX;
+				selObjMouseOffsetY = localY;
+				selectedObjIndex = index;
+				selectedMoveObjIndex = index;
+				obj.temp.noPhys = true;
+				obj.phys.xMomentum = 0;
+				obj.phys.yMomentum = 0;
+			};
 			if(obj.phys.useRect == true){
-				// todo
+				if((localX > 0 && localX < obj.phys.width) && (localY > 0 && localY < obj.phys.height)){
+					setObj();
+				}
 			}else{
-				if(pthag(ctxCords(event.offsetX) - obj.x, ctyCords(event.offsetY) - obj.y) < obj.phys.radius){
-					selectedObjIndex = index;
-					selectedMoveObjIndex = index;
-					obj.phys.xMomentum = 0;
-					obj.phys.yMomentum = 0;
+				if(pthag(localX, localY) < obj.phys.radius){
+					setObj();
 				}
 			}
 		});
@@ -188,8 +207,8 @@ function startUi(){ // run after webpage loaded
 		
 		let obj = objs[selectedMoveObjIndex];
 
-		obj.x = ctxCords(event.offsetX);
-		obj.y = ctyCords(event.offsetY);
+		obj.x = ctxCords(event.offsetX)-selObjMouseOffsetX;
+		obj.y = ctyCords(event.offsetY)-selObjMouseOffsetY;
 		obj.phys.xMomentum = 0;
 		obj.phys.yMomentum = 0;
 
@@ -200,6 +219,7 @@ function startUi(){ // run after webpage loaded
 		if(selectedMoveObjIndex == -1){return;}
 
 		let obj = objs[selectedMoveObjIndex];
+		obj.temp.noPhys = false;
 		selectedMoveObjIndex = -1;
 
 		obj.phys.xMomentum = ctScale(selObjMouseMovmentX);
@@ -219,7 +239,7 @@ function startUi(){ // run after webpage loaded
 	$all('.jsShowPhysNum').forEach(element => {
 		setInterval(() => {
 			element.innerHTML = numFormatter.format(physTicsRan);
-		}, 20);
+		}, (prefersReducedMotion?1000:20));
 	})
 
 	$all('.jsClearIntervalRender').forEach(element => {
@@ -234,7 +254,7 @@ function startUi(){ // run after webpage loaded
 	$all('.jsShowFramesRendered').forEach(element => {
 		setInterval(() => {
 			element.innerHTML = numFormatter.format(framesRendered);
-		}, 20)
+		}, (prefersReducedMotion?1000:20))
 	})
 
 	$all(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
@@ -259,12 +279,14 @@ function startUi(){ // run after webpage loaded
 	}
 
 	setTimeout(() => {
-		$('#loadingUi').style.height = '0px';
+		if(prefersReducedMotion != true){
+			$('#loadingUi').style.height = '0px';
+		}
 		$('#loadingUi').style.opacity = '0';
 		setTimeout(() => {
 			$('#loadingUi').remove();
-		}, 5000)
-	}, (hasURLParam('skipIntro') == true?0:2500));
+		}, (prefersReducedMotion?1000:5000))
+	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';
 	$('#stratiiIntroLogo').style.color = 'var(--accent-color)';

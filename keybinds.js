@@ -14,6 +14,10 @@ window.addEventListener("keydown", e => {
 			}
 		}
 	}
+	if(e.key == "/"){
+		let keybindsOverlay = document.querySelector('.keybindsOverlay');
+		keybindsOverlay.dataset.show = (keybindsOverlay.dataset.show != "true"?"true":"false")
+	}
 	if(e.key == "q"){
 		if(uiOpen == false){
 			openUI();
