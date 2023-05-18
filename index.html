@@ -1,42 +1,111 @@
-	<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description"content="2D rendering engine, physics engine, & interface. // by c3nn">
+	<meta name="theme-color" content="#000000"/>
 	<title>stratii</title>
-	<link rel="icon" href="assets/favicon.png" type="image/x-icon">
+	<link rel="icon" href="assets/baseIconHighRes.png" type="image/x-icon">
+	<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 	<link rel="stylesheet" href="main.css">
 </head>
-<body>
-	<div class="mainContainer">
-		<canvas style="z-index: 1;" id="mainCanvas" width="1" height="1"></canvas>
-		<canvas style="z-index: 2; display: none;" id="renderCanvas" width="1" height="1"></canvas>
-		<div class="sidebarContainer">
-			<div class="controlsContainer">
-				<input class="right" style="top: 0px;" id="renderButton" type="button" value="Render" onclick="renderCanvas.style.display = 'block';render(true)">
-				<span class="right" style="top: 40px; color: #ffffff1a;" id="frames" ></span>
-				<a href="https://c3nn.com" class="right" style="right: 4px; bottom: 0px; color: #ffffff03; font-size: 20px; text-decoration: none;">c3nn</a>
-				<div class="right canvasTypeSelector">
-					<input type="button" style="--img:url(assets/overlaysIcon.png); margin-bottom: 5px;" onclick="errMsg('coming soon :)')"></input>
-					<input type="button" style="--img:url(assets/baseIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'base';"></input>
-					<input type="button" style="--img:url(assets/normalsIcon.png)" onclick="renderCanvas.style.display = 'none';canvasType = 'normal';"></input>
-					<input type="button" style="--img:url(assets/renderIcon.png)" onclick="if(getFromImageData(0,0,1,getImageDataFromContext(renderContext,1,1)).a == 0){render(true);}renderCanvas.style.display = 'block';"></input>
+<body onload="startMain();try{startUi();}catch(error){alert('warning: ui missing');console.warn(error);document.querySelector('#loadingUi').style.display = 'none';}">
+<div id="winBar" style="display: none; top: 0px;">
+	<div style="width: 1px; white-space: nowrap; margin: calc(var(--winBarHeight) * 0.1); height: calc(var(--winBarHeight) * 0.8); font-size: calc(var(--winBarHeight) * 0.8); font-family: Open Sans;">
+		<img src="assets/baseIconHighRes.png" alt="stratii logo" style="image-rendering: pixelated;" onclick="this.parentElement.style.width = '0px';this.style.transition = 'rotate 1.5s cubic-bezier(.2,-0.3,.7,1.3)';this.style.rotate = '1080deg';">
+		<span style="position:relative; top: calc(var(--winBarHeight) * -0.15); left: calc(var(--winBarHeight) * 0.2);">Stratii</span>
+	</div>
+	<div style="width: 100%; -webkit-app-region: drag;"></div>
+	<div class="lastDiv">
+		<button id="winSmaller" class="winButton symbol" style="font-size: calc(var(--winBarHeightTrue) * 0.7); width: calc(var(--winBarHeightTrue) * 1.1); position: relative; top: 0px; right: 0px; text-indent: -3px;">Expand_less</button>
+		<button id="winMinimize" class="winButton symbol">Remove</button>
+		<button id="winMaximize" class="winButton symbol">Expand_content</button>
+		<button id="winClose" class="winButton symbol">Close</button>
+	</div>
+</div>
+<div class="ui">
+	<div class="vSplit" data-height="55%">
+		<div class="hSplit" data-title="object properties" data-width="400px">
+			
+		</div>
+		<div class="hSplit" style="overflow: hidden;">
+			<canvas class="mainCanvas" id="mainCanvas" width="400" height="350"></canvas>
+		</div>
+	</div>
+	<div class="vSplit">
+		<div class="hSplit" data-title="hay" data-width="700px">
+			<div class="vSplit" data-height="160px">
+				<div class="hSplit" data-title="physics controles">
+					<div class="flex">
+						<input type="number" id="timeBetween" class="playbackInput symbol" value="10" onchange="s.physicsIntervalTime = this.value;" disabled aria-label="time between each physics tic">ms</input>
+						<button class="playbackButton symbol jsClearIntervalPhysics" onclick="this.parentElement.querySelector('#timeBetween').disabled = false;">stop</button>
+						<button class="playbackButton symbol jsStartIntervalPhysics" onclick="this.parentElement.querySelector('#timeBetween').disabled = true;">play_arrow</button>
+						<button class="playbackButton symbol jsStepPhysics">chevron_right</button>
+					</div>
+					<span class="transparentSpan jsShowPhysNum"></span>
 				</div>
-				
-				<h1>Background Settings</h1>
-				<span><input type="button" value="off" onclick="backgroundEnabled = false;"></span>
-				<span><input type="button" value="on" onclick="backgroundEnabled = true;"></span>
-				<span>Color <input type="color" id="bgColor" value="#5a371c" onchange="background = this.value;"></span><br>
+				<div class="hSplit" data-title="render controles">
+					<div class="flex">
+						<input type="number" id="timeBetween" class="playbackInput symbol" value="10" onchange="s.renderIntervalTime = this.value;" disabled aria-label="time between each render tic">ms</input>
+						<button class="playbackButton symbol jsClearIntervalRender" onclick="this.parentElement.querySelector('#timeBetween').disabled = false;">stop</button>
+						<button class="playbackButton symbol jsStartIntervalRender" onclick="this.parentElement.querySelector('#timeBetween').disabled = true;">play_arrow</button>
+						<button class="playbackButton symbol jsStepRender">chevron_right</button>
+					</div>
+					<span class="transparentSpan jsShowFramesRendered"></span>
+				</div>
 			</div>
-			<div class="objectsContainer">
-				<span style="color: white;">objects here *-* (coming soon)</span>
+			<div class="vSplit">
+				hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+			</div>
+		</div>
+		<div class="hSplit">
+			  ╱|、<br>
+			 (˚ˎ 。7  <br>
+			  |、˜〵          <br>
+			 じしˍ,)ノ
+		</div>
+		<div class="hSplit" data-title="devmenu" id="devmenu" style="display: none;">  <!-- dev menu -->
+			<div style="pointer-events: all; background-color: rgba(104, 21, 182, 0.247);">
+				<button onclick="save()">save to hash</button>
+				<button onclick="load()">load from hash</button>
+				<span id="objsTEST" style="color:cornflowerblue;"></span>
+				<span id="sTEST" style="color: burlywood;"></span>
 			</div>
 		</div>
 	</div>
-	
-	<div class="errorContainer"></div>
-<script src="ui.js"></script>
-<script src="main.js"></script>
+</div>
+<div class="statusBar">
+	<div>
+		<span id="keybindArea" style="margin-left: 2px;"></span>
+		<span style="opacity: 0.4;"><span data-jetbrains>[/]</span> for more keybinds</span>
+	</div>
+	<div>
+		<span style="opacity: 0.4;">v0.0.2.03.beta</span>
+		<a data-jetbrains style="opacity: 0.4; margin-right: 2px; text-decoration: none; color: var(--accent-color);" href="https://c3nn.com">c3nn</a>
+	</div>
+</div>
+<div class="vSplit keybindsOverlay">
+	<div class="hSplit" data-title="Keybinds">
+		<span data-jetbrains>[/]</span><span> hide this menu</span><br>
+		<span data-jetbrains>[W][A][S][D]</span><span> move camera</span><br>
+		<span data-jetbrains>[,][.]</span><span> zoom-in/zoom-out</span>
+	</div>
+</div>
+
+
+<div id="loadingUi" style="overflow: visible; pointer-events: all; position: fixed; left: 0px; bottom: 0px; width: 100%; height: 100%; background: #000000; display: flex; justify-content: center; align-items: center; font-family: Times New Roman, Georgia, Garamond, Serif; font-weight: bold; transition: all 1s cubic-bezier(.76,0,.88,.99); opacity: 1; z-index: 99999;"> <!-- loading ui -->
+	<div style="position: relative; top: calc((100vh - 100%)*-0.2); animation: intro 5s ease-in, introMid 2s ease-out 5s, introEnd 1s ease 7s forwards; pointer-events: none;">
+		<span id="stratiiIntroLogo" style="font-size: 40vh; cursor: default; text-shadow: 0px 0px 1vh var(--accent-color); color: black; transition: color 1s ease, text-shadow 1s ease;">stratii</span><br>
+	</div>
+	<span id="loadingText" style="font-size: 2vh; position: absolute; bottom: 1vh; right: 1vh; color: #faebd7; color: var(--accent-color);">please enable javascript</span><script>document.querySelector('#loadingText').innerHTML = "loading webpage..."</script>
+</div>
+
 </body>
+<script src="libs/fileSaver.js"></script>
+<script src="index.js"></script>
+<script src="ui.js"></script>
+<script src="keybinds.js"></script>
+<script src="electron.js"></script>
 </html>
