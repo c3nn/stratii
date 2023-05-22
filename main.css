@@ -27,6 +27,7 @@
 	--dark-accent-color: #121212;
 	--accent-color: #ffffff8c;
 	--bg-color: #181818;
+
 	--ui-border-thickness: 3px;
 	--title-size: 12px;
 	--winBarIsOpen: 0;
@@ -43,9 +44,6 @@
 	height: 0px;
 	background: transparent;
 	display: none;
-}
-.material-symbols-rounded{
-	font-size: auto;
 }
 
 #winBar{
@@ -91,10 +89,10 @@
 		animation: none !important;
 		transition: opacity 1s linear !important;
 	}
-	.keybindsOverlay{
+	.overlayWindow{
 		transition: opacity var(--duration) linear !important;
 	}
-	.keybindsOverlay:not([data-show="true"]){
+	.overlayWindow:not([data-show="true"]){
 		transition: opacity var(--duration) linear, height 0s linear var(--duration), bottom 0s linear var(--duration) !important;
 	}
 }
@@ -157,6 +155,12 @@
 	font-size: var(--status-bar-height);
 	justify-content: space-between;
 	align-items: center;
+}
+.statusBar .symbol{
+	font-size: calc(var(--status-bar-height) * 0.8);
+	position: relative;
+	margin-right: 2px;
+	top: calc(var(--status-bar-height) * 0.08);
 }
 .hSplit, .vSplit{
 	position: relative;
@@ -251,7 +255,19 @@
 	direction: rtl;
 	text-decoration: underline;
 }
-.keybindsOverlay{
+.keybind{
+	display: inline-block;
+	font-family: JetBrains Mono;
+	color: var(--bg-color);
+	scale: 0.9;
+	background: var(--accent-color);
+	padding: 2px;
+	border: solid transparent 0px;
+	border-radius: 5px;
+}
+.keybind:before{content: '[';}
+.keybind:after{content: ']';}
+.overlayWindow{
 	--timingFunc: cubic-bezier(.1,.8,0,1.05);
 	--duration: 0.7s;
 	position: absolute;
@@ -264,20 +280,23 @@
 	opacity: 1;
 	transition: opacity var(--duration) var(--timingFunc), height var(--duration) var(--timingFunc), bottom var(--duration) var(--timingFunc);
 }
-.keybindsOverlay:not([data-show="true"]){
+.overlayWindow:not([data-show="true"]){
 	height: 0px;
 	opacity: 0;
 	bottom: 5%;
 	user-select: none;
 	pointer-events: none;
 }
-.keybindsOverlay span:not(.data-title){
+.overlayWindow span:not(.data-title){
 	position: relative;
 	border-color: var(--accent-color);
-	transition: top var(--duration) var(--timingFunc);
+	transition: top var(--duration) var(--timingFunc), opacity var(--duration) var(--timingFunc);
+	transition-delay: calc(0.08s * var(--delay));
 	top: 0px;
+	opacity: 1;
 }
-.keybindsOverlay:not([data-show="true"]) span:not(.data-title){
+.overlayWindow:not([data-show="true"]) span:not(.data-title){
 	top: 100px;
-	transition-delay: var(--duration);
+	opacity: 0;
+	transition-delay: 0s;
 }

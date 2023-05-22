@@ -156,6 +156,34 @@ objs = [{
 	temp:{}
 }];
 
+function setCookie(cname, cvalue, exdays) {
+	const d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	let expires = "expires="+ d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+function getCookie(cname) {
+	let name = cname + "=";
+	let decodedCookie = decodeURIComponent(document.cookie);
+	let ca = decodedCookie.split(';');
+	for(let i = 0; i <ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+function hasCookie(cname) {
+	return (getCookie(cname)?true:false);
+}
+function deleteCookie(cname){
+	if(!hasCookie(cname)){return}
+	setCookie(cname, '', 0);
+}
 function bezier(points, t) {
 	var n = points.length - 1;
 	var b = [];
@@ -225,21 +253,50 @@ function getURLHash(){
 	if(location.hash == ''){return null;}
 	return location.hash.replace('#','');
 }
-function save(toFile = false){
-	if(toFile == true){
-		//? todo
-		return;
-	}
-	setURLHash(JSON.stringify({s:s,objs:objs}));
+function getSaveString(){
+	return JSON.stringify({s:s,objs:objs});
 }
-function load(fromFile = false){ //? BUG: Functions not loaded properly; treated as string
-	if(fromFile == true){
-		//? todo
-		return;
-	}
-	s = JSON.parse(decodeURI(getURLHash())).s;
-	objs = JSON.parse(decodeURI(getURLHash())).objs;
+function loadFromString(string){
+	try {
+	
+	s = JSON.parse(string).s;
+	objs = JSON.parse(string).objs;
 	updateCSSVars();
+	
+	}catch(error){warnMsg('error loading save', error, true);}
+}
+function saveToHash(){
+	setURLHash(getSaveString());
+}
+function loadFromHash(){ //? BUG: Functions not loaded properly; treated as string
+	loadFromString(decodeURI(getURLHash()));
+}
+function saveToFile(){
+	let blob = new Blob([getSaveString()]);
+	let d = new Date();
+	saveAs(blob, `stratii_${d.getTime()}_save.txt`)
+}
+function loadFromFile(){
+	let input = document.createElement('input');
+	input.type = 'file';
+	input.onchange = event => { 
+		let file = event.target.files[0];
+		let reader = new FileReader();
+		reader.readAsText(file,'UTF-8');
+		reader.onload = readerEvent => {
+			let content = readerEvent.target.result;
+			console.log(content)
+			loadFromString(content);
+		}
+	}
+	input.click();
+}
+function saveToCookies(){
+	setCookie('save', getSaveString(), 1)
+}
+function loadFromCookies(){
+	if(!hasCookie('save')){warnMsg('no save cookie found');}
+	loadFromString(getCookie('save'));
 }
 function clearSave(){
 	setURLHash('');
@@ -281,7 +338,7 @@ function ctyCords(y, camY = s.cameraY, camZoom = s.cameraZoom){
 function ctScale(num, camZoom = s.cameraZoom){
 	return num / camZoom;
 }
-function warnMsg(msg, redOutline = false, formalError = null){
+function warnMsg(msg, formalError = null, redOutline = false){
 	// let element = document.createElement('span'); todo // have another section for the formal error
 	// todo
 	console.warn(`warning: ${msg}` + (formalError != null?` /// Formal Error: ${formalError}`:''));
@@ -436,7 +493,7 @@ function startMain()
 	}
 	if(getURLHash() != null){
 		loadingText.innerHTML = 'restoring old session...';
-		load();
+		loadFromHash();
 	}else{
 		updateCSSVars();
 	}

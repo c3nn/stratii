@@ -68,8 +68,10 @@
 		</div>
 		<div class="hSplit" data-title="devmenu" id="devmenu" style="display: none;">  <!-- dev menu -->
 			<div style="pointer-events: all; background-color: rgba(104, 21, 182, 0.247);">
-				<button onclick="save()">save to hash</button>
-				<button onclick="load()">load from hash</button>
+				<button onclick="saveToHash()">save to hash</button>
+				<button onclick="loadFromHash()">load from hash</button>
+				<button onclick="saveToCookies()">save to cookies</button>
+				<button onclick="loadFromCookies()">load from cookies</button>
 				<span id="objsTEST" style="color:cornflowerblue;"></span>
 				<span id="sTEST" style="color: burlywood;"></span>
 			</div>
@@ -79,19 +81,17 @@
 <div class="statusBar">
 	<div>
 		<span id="keybindArea" style="margin-left: 2px;"></span>
-		<span style="opacity: 0.4;"><span data-jetbrains>[/]</span> for more keybinds</span>
+		<span style="opacity: 0.4;" data-tooltip="press [/] for more keybinds"><span class="keybind">/</span>for more keybinds</span>
 	</div>
 	<div>
-		<span style="opacity: 0.4;">v0.0.2.03.beta</span>
+		<span style="opacity: 0.4;">v0.0.2.04.beta</span>
 		<a data-jetbrains style="opacity: 0.4; margin-right: 2px; text-decoration: none; color: var(--accent-color);" href="https://c3nn.com">c3nn</a>
+		<!-- <span id="settingsButton" class="symbol">settings</span> -->
 	</div>
 </div>
-<div class="vSplit keybindsOverlay">
-	<div class="hSplit" data-title="Keybinds">
-		<span data-jetbrains>[/]</span><span> hide this menu</span><br>
-		<span data-jetbrains>[W][A][S][D]</span><span> move camera</span><br>
-		<span data-jetbrains>[,][.]</span><span> zoom-in/zoom-out</span>
-	</div>
+
+<div id="keybindsOverlay" class="vSplit overlayWindow">
+	<div class="jsKeybindList hSplit" data-title="Keybinds"></div>
 </div>
 
 
