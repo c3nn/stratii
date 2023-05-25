@@ -183,7 +183,7 @@ function deleteCookie(cname){
 	if(!hasCookie(cname)){return}
 	setCookie(cname, '', 0);
 }
-function bezier(points, t) {
+function bezier(points, t) { // never even used... why here?
 	var n = points.length - 1;
 	var b = [];
 	for (var i = 0; i <= n; i++) {
@@ -353,6 +353,7 @@ function statusActionMsg(msg, tooltip = ''){
 
 }
 function statusWarnMsg(msg, tooltip = ''){
+	// shi-- hit the fan, shut it all dowon
 	console.warn(`!warnMsg: ${msg}` + (tooltip != 'no info more provided'?` /// tooltip ${tooltip}`:''));
 }
 function statusErrMsg(msg, tooltip = ''){
@@ -404,6 +405,7 @@ function renderTic()
 		renderObj(mainContext, obj, s.cameraX, s.cameraY, s.cameraZoom);
 	});
 	if(s.showHitboxes == true){
+		// idk why this has an extra property
 		objs.forEach((obj, index) => {
 			mainContext.beginPath();
 			let color = (index/objs.length)*360;
