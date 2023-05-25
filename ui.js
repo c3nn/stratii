@@ -1,28 +1,16 @@
-const loadingText = document.querySelector('#loadingText'),
-$ = function(selector){return document.querySelector(selector);},
-$all = function(selector){return document.querySelectorAll(selector);};
+const loadingText = document.querySelector('#loadingText');
 var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
 prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches,
 prefersContrastMore = window.matchMedia("(prefers-contrast: more)").matches;
 if(isFirefox == true && hasURLParam('ffox') == false){
 	alert("attention: you are useing firefox right? well stratii doesn't support firefox so things may be (will be very) broken. I recommend operaGX but chrome is ok too I guess. (if you want to stop seeing this message just type '?ffox' after the domain. EX: 'example.com/?ffox' )")
 }
-if(prefersContrastMore == true){
-	s.uiAccentColor = {r: 255,g: 255,b: 255};
-	s.uiBgColor = {r: 0,g: 0,b: 0};
-	s.uiDarkAccentColor = {r: 70,g: 70,b: 70};
-	updateCSSVars();
-}
 
 var isGlobalMouseDown = false;
 window.addEventListener("mousedown", () => { isGlobalMouseDown = true; });
 window.addEventListener("mouseup", () => { isGlobalMouseDown = false; });
-function userSelectOff(){
-	$(':root').style.userSelect = 'none';
-}
-function userSelectOn(){
-	$(':root').style.userSelect = 'auto';
-}
+function userSelectOff(){ $(':root').style.userSelect = 'none'; }
+function userSelectOn(){ $(':root').style.userSelect = 'auto'; }
 
 var selectedMoveObjIndex = -1, // polish up
 selectedObjIndex = 0; // todo
@@ -57,40 +45,10 @@ mainCanvas.addEventListener("wheel", (event) => {
 	if(s.cameraZoom < 0.02){
 		s.cameraZoom = 0.02;
 	}
-}, { passive: true});
+}, {passive: true});
 
 function startUi(){ // run after webpage loaded
 	loadingText.innerHTML = 'starting UI...';
-
-	// electron extras
-	loadingText.innerHTML = 'applying electron JS...';
-
-	document.querySelector('#winSmaller').addEventListener('click', () => {
-		let winBar = $('#winBar'),
-		winSmaller = $('#winBar .lastDiv #winSmaller');
-		
-		if(winSmaller.style.position != 'fixed'){
-			cssVar('winBarIsOpen', 0);
-			winBar.style.top = 'calc(var(--winBarHeightTrue) * -1)';
-			setTimeout(() => {
-				winSmaller.style.top = 'var(--winBarHeightTrue)';
-				winSmaller.style.position = 'fixed';
-				winSmaller.innerHTML = 'Expand_more';
-				winSmaller.style.borderBottomLeftRadius = 'calc(var(--winBarHeightTrue) * 0.4)';
-			}, 600)
-		}else{
-			winSmaller.style.top = '0px';
-			setTimeout(() => {
-				winBar.style.top = '0px';
-				cssVar('winBarIsOpen', 1);
-				winSmaller.style.position = 'relative';
-				winSmaller.innerHTML = 'Expand_less';
-				winSmaller.style.borderBottomLeftRadius = '0px';
-			}, 200)
-		}
-	});
-
-	loadingText.innerHTML = 'applying layout JS...';
 	
 	function canvasResize(){
 		mainCanvas.height = mainCanvas.clientHeight;
@@ -98,7 +56,7 @@ function startUi(){ // run after webpage loaded
 		renderTic()
 	}
 	canvasResize();
-	new ResizeObserver(canvasResize).observe(mainCanvas)
+	new ResizeObserver(canvasResize).observe(mainCanvas);
 
 	let mouseDownFunct = function(element, isVSplit){
 		userSelectOff();
@@ -126,8 +84,9 @@ function startUi(){ // run after webpage loaded
 		var passesY,
 		passesX;
 		element.addEventListener('mousemove', event => {
-			passesY = (event.offsetY + s.uiBorderThickness > element.clientHeight);
-			passesX = (event.offsetX + s.uiBorderThickness > element.clientWidth);
+			let splitBorderThickness = cssVar('split-border-thickness', null, ':root', true);
+			passesY = (event.offsetY + splitBorderThickness > element.clientHeight);
+			passesX = (event.offsetX + splitBorderThickness > element.clientWidth);
 			if(isVSplit == true){
 				if(passesY){
 					element.style.cursor = 'n-resize';
@@ -149,7 +108,7 @@ function startUi(){ // run after webpage loaded
 				if(!passesX){return;}
 			}
 			mouseDownFunct(element, isVSplit);
-		})
+		});
 	});
 	$all(':is(.vSplit, .hSplit)[data-title]').forEach(element => {
 		let isVSplit = element.matches('.vSplit'),
@@ -240,7 +199,7 @@ function startUi(){ // run after webpage loaded
 		setInterval(() => {
 			element.innerHTML = numFormatter.format(physTicsRan);
 		}, (prefersReducedMotion?1000:20));
-	})
+	});
 
 	$all('.jsClearIntervalRender').forEach(element => {
 		element.addEventListener('click', clearRenderTic);
@@ -254,8 +213,8 @@ function startUi(){ // run after webpage loaded
 	$all('.jsShowFramesRendered').forEach(element => {
 		setInterval(() => {
 			element.innerHTML = numFormatter.format(framesRendered);
-		}, (prefersReducedMotion?1000:20))
-	})
+		}, (prefersReducedMotion?1000:20));
+	});
 
 	$all(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
 		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
@@ -266,6 +225,15 @@ function startUi(){ // run after webpage loaded
 		element.style.flex = `0 0 ${element.dataset.width}`;
 	});
 
+	$all('*[data-tooltip]').forEach(element => {
+		element.addEventListener("mouseover", event => {
+			if(!$(':root:has(*[data-tooltip]:hover)')){return;}
+			let tooltip = $('#tooltip');
+			tooltip.style.top = `${event.clientY - tooltip.clientHeight - 5}px`;
+			tooltip.style.left = `${event.clientX + 5}px`;
+			tooltip.innerHTML = $('*[data-tooltip]:hover').dataset.tooltip;
+		});
+	});
 
 	if(hasURLParam('lolcat')){
 		let lolCatTimerGG = 0;

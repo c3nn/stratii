@@ -24,13 +24,15 @@ createKeybind('/', 'show/hide keybinds menu', () => {
 	let keybindsOverlay = $('#keybindsOverlay');
 	keybindsOverlay.dataset.show = (keybindsOverlay.dataset.show != "true"?"true":"false");
 }, );
-createKeybind('`', '', (e) => {
+createKeybind('`', (hasURLParam('dev')?'open console':''), (e) => { // dev
 	if(!hasURLParam('dev')){return;}
 	try {
 		let prVal = prompt("console");
 		if(prVal == 'hid'){
 			$('#devmenu').style.display = "none";
 			$('#devmenu').remove();
+		}else if(prVal == 'showSettings'){
+			$('#settingsButton').style.display = 'inline';
 		}else{
 			eval(prVal);
 		}

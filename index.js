@@ -20,6 +20,9 @@ lightTexture = [
 	0,0,0,0, 0,0,0,0, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,0, 0,0,0,0,
 ];
 mainContext.imageSmoothingEnabled = false;
+const $ = function(selector){return document.querySelector(selector);},
+$all = function(selector){return document.querySelectorAll(selector);};
+String.prototype.delChar = function(sel){return this.replace(sel,'')};
 
 var s = {
 	canvasType: 'base',
@@ -36,11 +39,6 @@ var s = {
 	globalLighting: {r:100, g:100, b:100},
 	background: {r:20, g:20, b:20},
 	backgroundEnabled: false,
-	uiBorderThickness: 3,
-	uiBgColor: {r:24, g:24, b:24},
-	uiDarkAccentColor: {r:0, g:0, b:0, a: 0.55},
-	uiAccentColor: {r:255, g:255, b:255, a: 0.55},
-	uiTitleSize: 12,
 	physicsIntervalRunning: true,
 	physicsIntervalTime: 10,
 	renderIntervalRunning: true,
@@ -48,7 +46,8 @@ var s = {
 };
 var framesRendered = 0,
 physTicsRan = 0;
-objs = [{
+objs = [
+{
 	x: 0,
 	y: 0,
 	rotation: 0,
@@ -254,6 +253,7 @@ function getURLHash(){
 	return location.hash.replace('#','');
 }
 function getSaveString(){
+	saveCSSVars();
 	return JSON.stringify({s:s,objs:objs});
 }
 function loadFromString(string){
@@ -261,9 +261,9 @@ function loadFromString(string){
 	
 	s = JSON.parse(string).s;
 	objs = JSON.parse(string).objs;
-	updateCSSVars();
+	setCSSVars();
 	
-	}catch(error){warnMsg('error loading save', error, true);}
+	}catch(error){statusErrMsg('error loading save', error);}
 }
 function saveToHash(){
 	setURLHash(getSaveString());
@@ -295,26 +295,34 @@ function saveToCookies(){
 	setCookie('save', getSaveString(), 1)
 }
 function loadFromCookies(){
-	if(!hasCookie('save')){warnMsg('no save cookie found');}
+	if(!hasCookie('save')){statusWarnMsg('no save cookie found');}
 	loadFromString(getCookie('save'));
 }
 function clearSave(){
 	setURLHash('');
 }
-function cssVar(name, val = null, obj = ':root'){
+function cssVar(name, val = null, obj = ':root', removeType = false){
 	if(val != null){
-		document.querySelector(obj).style.setProperty('--' + name, val);
+		$(obj).style.setProperty('--' + name, val);
 	}
 	else{
-		return getComputedStyle(obj).getPropertyValue('--' + name);
+		let output = getComputedStyle($(obj)).getPropertyValue('--' + name);
+		return (removeType?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);
 	}
 }
-function updateCSSVars(){
-	cssVar('title-size', `${s.uiTitleSize}px`);
-	cssVar('ui-border-thickness', `${s.uiBorderThickness}px`);
-	cssVar('bg-color', colorObjToRGB(s.uiBgColor));
-	cssVar('dark-accent-color', colorObjToRGB(s.uiDarkAccentColor));
-	cssVar('accent-color', colorObjToRGB(s.uiAccentColor));
+function saveCSSVars(){
+	let varList = ['bg-color','dark-accent-color','accent-color','yellow-color','red-color','split-border-thickness','title-size','menu-bar-height','status-bar-height']
+	s.cssVars = []
+	varList.forEach(item => {
+		s.cssVars.push({name:item,val:cssVar(item)});
+	});
+}
+function setCSSVars(){
+	if(!s.cssVars){statusErrMsg('cssVarsNotSaved','custom ui properties will not be restored');return;}
+	s.cssVars.forEach(v => {
+		cssVar(v.name,v.val);
+	})
+
 }
 function wtxCords(localx, objx = 0, objzoom = 1, camX = s.cameraX, camZoom = s.cameraZoom){
 	let objX = camX + objx * camZoom,
@@ -338,10 +346,17 @@ function ctyCords(y, camY = s.cameraY, camZoom = s.cameraZoom){
 function ctScale(num, camZoom = s.cameraZoom){
 	return num / camZoom;
 }
-function warnMsg(msg, formalError = null, redOutline = false){
-	// let element = document.createElement('span'); todo // have another section for the formal error
-	// todo
-	console.warn(`warning: ${msg}` + (formalError != null?` /// Formal Error: ${formalError}`:''));
+function createStatusMsg(msg, tooltip = 'no info more provided', color = ''){
+	
+}
+function statusActionMsg(msg, tooltip = ''){
+
+}
+function statusWarnMsg(msg, tooltip = ''){
+	console.warn(`!warnMsg: ${msg}` + (tooltip != 'no info more provided'?` /// tooltip ${tooltip}`:''));
+}
+function statusErrMsg(msg, tooltip = ''){
+
 }
 
 function renderGround(context, canvasWidth, thickness, height, color = {r,g,b,a}, camY, camZoom)
@@ -494,8 +509,6 @@ function startMain()
 	if(getURLHash() != null){
 		loadingText.innerHTML = 'restoring old session...';
 		loadFromHash();
-	}else{
-		updateCSSVars();
 	}
 
 	loadingText.innerHTML = 'checking physicsTic...';

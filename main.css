@@ -21,20 +21,39 @@
 	src: local("bahnschrift"), url("assets/bahnschrift.ttf");
 	font-display: swap;
 }
+@supports (background: paint(something)) { /* use houdini so they can be animated, val not used */
+	@property --menu-bar-open {
+		syntax: '<number>';
+		initial-value: 0;
+		inherits: false;
+	}
+	@property --status-bar-open {
+		syntax: '<number>';
+		initial-value: 0;
+		inherits: false;
+	}
+}
 :root{
-	background-color: #000000;
-	/* all changed by js */
-	--dark-accent-color: #121212;
-	--accent-color: #ffffff8c;
-	--bg-color: #181818;
+	--bg-color: rgba(24,24,24,1);
+	--dark-accent-color: rgba(0,0,0,0.55);
+	--accent-color: rgba(255,255,255,0.55);
+	--yellow-color: rgba(216,173,33,1);
+	--red-color: rgba(216,33,33,1);
 
-	--ui-border-thickness: 3px;
+	--timing-func-overshoot: cubic-bezier(.1,.8,0,1.05);
+
+	--split-border-thickness: 3px;
 	--title-size: 12px;
-	--winBarIsOpen: 0;
-	--winBarHeightTrue: 25px;
-	--winBarHeight: calc(var(--winBarHeightTrue) * var(--winBarIsOpen));
+	--menu-bar-open: 0;
+	--menu-bar-height: 25px;
+	--menu-bar-height-variable: calc(var(--menu-bar-height) * var(--menu-bar-open));
+	--status-bar-height-variable-limited: min(var(--menu-bar-height-variable), calc(var(--menu-bar-height) * 1.5));
+	--status-bar-open: 1;
 	--status-bar-height: 13px;
-	
+	--status-bar-height-variable: calc(var(--status-bar-height) * var(--status-bar-open));
+	--status-bar-height-variable-limited: min(var(--status-bar-height-variable), calc(var(--status-bar-height) * 1.5));
+	transition: --status-bar-open 1s var(--timing-func-overshoot), --menu-bar-open 1s var(--timing-func-overshoot);
+
 	background: var(--bg-color);
 	color: var(--accent-color);
 	font-family: bahnschrift;
@@ -45,44 +64,9 @@
 	background: transparent;
 	display: none;
 }
-
-#winBar{
-	display: flex;
-	justify-content: space-between;
-	position: fixed;
-	width: 100%;
-	height: var(--winBarHeightTrue);
-	top: 0px;
-	left: 0px;
-	background: var(--dark-accent-color);
-	color: var(--accent-color);
-	backdrop-filter: blur(10px);
-	z-index: 99998;
-	transition: top 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-#winBar div{
-	display: flex;
-}
-.winButton{
-	width: calc(var(--winBarHeightTrue) * 1.5);
-	height: var(--winBarHeightTrue);
-	background: #000000;
-	overflow: hidden;
-	pointer-events: all;
-	background: transparent;
-	transition: background 0.2s ease, color 0.2s ease, top 0.2s ease;
-	border: none;
-	color: var(--accent-color);
-	font-size: calc(var(--winBarHeightTrue) * 0.9) !important;
-}
-.winButton:hover{
-	background: var(--accent-color);
-	color: var(--bg-color);
-}
 *[data-jetbrains]{
 	font-family: Jetbrains mono;
 }
-
 
 @media (prefers-reduced-motion: reduce) {
 	#loadingUi, #loadingUi *{
@@ -97,6 +81,11 @@
 	}
 }
 @media (prefers-contrast: more) {
+	:root{
+		--accent-color: #ffffff;
+		--bg-color: #000000;
+		--dark-accent-color: rgb(70,70,70);
+	}
 	.transparentSpan{
 		opacity: 1 !important;
 		color: var(--accent-color);
@@ -105,7 +94,7 @@
 	.statusBar *{
 		opacity: 1 !important;
 	}
-}
+}	
 
 @keyframes intro {
 	0%{letter-spacing: 3vh;}
@@ -119,6 +108,27 @@
 	0%{letter-spacing: -1vh;}
 	100%{letter-spacing: 0vh;}
 }
+*[data-tooltip]:hover{
+	position: relative;
+}
+#tooltip{
+	position: fixed;
+	z-index: 99999;
+	background: var(--dark-accent-color);
+	padding: 5px;
+	border: solid 0px transparent;
+	border-radius: 2px;
+	font-size: var(--title-size);
+	user-select: none;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 1s var(--timing-func-overshoot);
+}
+:root:has(*[data-tooltip]:hover) * #tooltip{
+	display: block;
+	opacity: 1;
+	transition-delay: 1s;
+}
 .mainCanvas{
 	width: 100%;
 	height: 100%;
@@ -130,10 +140,9 @@
 	display: flex;
 	position: absolute;
 	left: 0px;
-	bottom: var(--status-bar-height);
+	bottom: var(--status-bar-height-variable);
 	width: 100%;
-	height: calc(100svh - var(--winBarHeight) - var(--status-bar-height));
-	transition: height 0.3s ease, width 0.3s ease;
+	height: calc(100svh - var(--menu-bar-height-variable) - var(--status-bar-height-variable));
 	margin: 0px;
 	padding: 0px;
 	background: var(--bg-color);
@@ -142,39 +151,51 @@
 	flex-direction: column;
 	align-items: center;
 }
-.statusBar{
+.statusBar, .menuBar{
+	--timing-fuct: var(--timing-func-overshoot);
 	position: absolute;
 	display: flex;
 	bottom: 0px;
 	left: 0px;
 	width: 100%;
-	height: var(--status-bar-height);
+	height: var(--status-bar-height-variable);
 	overflow: hidden;
 	background: var(--dark-accent-color);
 	color: var(--accent-color);
-	font-size: var(--status-bar-height);
+	font-size: var(--status-bar-height-variable-limited);
 	justify-content: space-between;
 	align-items: center;
 }
-.statusBar .symbol{
-	font-size: calc(var(--status-bar-height) * 0.8);
+:is(.statusBar, .menuBar) .symbol{
+	font-size: calc(var(--status-bar-height-variable-limited) * 0.8);
 	position: relative;
 	margin-right: 2px;
-	top: calc(var(--status-bar-height) * 0.08);
+	top: calc(var(--status-bar-height-variable-limited) * 0.08);
+}
+:root:has(* .statusBar:hover){
+	--status-bar-open: 3;
+}
+.menuBar{
+	top: 0px;
+	height: var(--menu-bar-height-variable);
+	font-size: var(--menu-bar-height-variable-limited);
+}
+:root:has(* .menuBar:hover){
+	--menu-bar-open: 3;
 }
 .hSplit, .vSplit{
 	position: relative;
 	margin: 0px;
 	padding: 0px;
 	background: transparent;
-	border-right: solid var(--ui-border-thickness) var(--dark-accent-color);
-	height: 100%;
-	width: 100%; /* both 100% so it's evenly spaced */
+	border-right: solid var(--split-border-thickness) var(--dark-accent-color);
+	height: 100%; /**/
+	width: 100%; /** both 100% so it's evenly spaced */
 	overflow: auto;
 }
 .vSplit{
 	border: none;
-	border-bottom: solid var(--ui-border-thickness) var(--dark-accent-color);
+	border-bottom: solid var(--split-border-thickness) var(--dark-accent-color);
 }
 .hSplit:last-of-type, .vSplit:last-of-type{
 	border: none;
@@ -206,7 +227,7 @@
 	font-size: calc(var(--title-size) * 1.5);
 }
 :is(.vSplit, .hSplit) .indent{
-	border-left: solid var(--ui-border-thickness) var(--accent-color);
+	border-left: solid var(--split-border-thickness) var(--accent-color);
 	padding-left: 2px;
 }
 :is(.vSplit, .hSplit) span{
@@ -268,14 +289,14 @@
 .keybind:before{content: '[';}
 .keybind:after{content: ']';}
 .overlayWindow{
-	--timingFunc: cubic-bezier(.1,.8,0,1.05);
+	--timingFunc: var(--timing-func-overshoot);
 	--duration: 0.7s;
 	position: absolute;
 	left: 15%;
 	bottom: 10%;
 	width: 70%;
 	height: 80%;
-	outline: solid var(--ui-border-thickness) var(--accent-color);
+	outline: solid var(--split-border-thickness) var(--accent-color);
 	background: var(--dark-accent-color);
 	opacity: 1;
 	transition: opacity var(--duration) var(--timingFunc), height var(--duration) var(--timingFunc), bottom var(--duration) var(--timingFunc);
