@@ -84,7 +84,7 @@ function startUi(){ // run after webpage loaded
 		var passesY,
 		passesX;
 		element.addEventListener('mousemove', event => {
-			let splitBorderThickness = css('--split-border-thickness', [], {removeType: true});
+			let splitBorderThickness = css('--split-border-thickness', null, {resolveToNum: true});
 			passesY = (event.offsetY + splitBorderThickness > element.clientHeight);
 			passesX = (event.offsetX + splitBorderThickness > element.clientWidth);
 			if(isVSplit == true){
