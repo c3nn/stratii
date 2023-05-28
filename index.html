@@ -61,7 +61,7 @@
 				<button onclick="loadFromCookies()">load from cookies</button>
 				<button onclick="saveToFile()">save to file</button>
 				<button onclick="loadFromFile()">load from file</button>
-				<button onclick="loadFromString(prompt('string 🤪'))">load to string</button>
+				<button onclick="loadFromString(prompt('string'))">load to string</button>
 				<button onclick="console.log(getSaveString())">save from string</button>
 				<span id="objsTEST" style="color:cornflowerblue;"></span>
 				<span id="sTEST" style="color: burlywood;"></span>
@@ -80,7 +80,9 @@
 		<span style="opacity: 0.4;" data-tooltip="press [/] for more keybinds"><span class="keybind">/</span>for more keybinds</span>
 	</div>
 	<div>
-		<span style="opacity: 0.4;">v0.0.2.05.beta</span>
+		<span id="statusMsg" class="statusMsg" style="opacity: 0.7;" data-tooltip=""></span>
+		<span style="opacity: 0.4;">v0.0.2.06.beta</span>
+		<span class="jsClock" style="opacity: 0.4;" data-tooltip="a clock">[clock]</span>
 		<a data-jetbrains style="opacity: 0.4; margin-right: 2px; text-decoration: none; color: var(--accent-color);" href="https://c3nn.com">c3nn</a>
 		<span id="settingsButton" style="display: none;" class="symbol">settings</span>
 	</div>

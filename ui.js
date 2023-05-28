@@ -9,8 +9,8 @@ if(isFirefox == true && hasURLParam('ffox') == false){
 var isGlobalMouseDown = false;
 window.addEventListener("mousedown", () => { isGlobalMouseDown = true; });
 window.addEventListener("mouseup", () => { isGlobalMouseDown = false; });
-function userSelectOff(){ $(':root').style.userSelect = 'none'; }
-function userSelectOn(){ $(':root').style.userSelect = 'auto'; }
+function userSelectOff(){ $(':root').css('user-select','none'); }
+function userSelectOn(){ $(':root').css('user-select', null); }
 
 var selectedMoveObjIndex = -1, // polish up
 selectedObjIndex = 0; // todo
@@ -70,7 +70,7 @@ function startUi(){ // run after webpage loaded
 			newHeight = startHeight + (window.event.clientY - startY);
 			if((isVSplit?newHeight < minSpace:newWidth < minSpace) || (isVSplit?newHeight > element.parentElement.clientHeight-minSpace:newWidth > element.parentElement.clientWidth-minSpace)){return;}
 
-			element.style.flex = `0 0 ${(isVSplit?newHeight:newWidth)}px`;
+			element.css('flex', `0 0 ${(isVSplit?newHeight:newWidth)}px`);
 		};
 		window.addEventListener("mousemove", mousemoveFunct);
 		window.addEventListener("mouseup", () => {
@@ -84,20 +84,20 @@ function startUi(){ // run after webpage loaded
 		var passesY,
 		passesX;
 		element.addEventListener('mousemove', event => {
-			let splitBorderThickness = cssVar('split-border-thickness', null, ':root', true);
+			let splitBorderThickness = css('--split-border-thickness', [], {removeType: true});
 			passesY = (event.offsetY + splitBorderThickness > element.clientHeight);
 			passesX = (event.offsetX + splitBorderThickness > element.clientWidth);
 			if(isVSplit == true){
 				if(passesY){
-					element.style.cursor = 'n-resize';
+					element.css('cursor', 'n-resize');
 				}else{
-					element.style.cursor = 'auto';
+					element.css('cursor', 'auto');
 				}
 			}else{
 				if(passesX){
-					element.style.cursor = 'e-resize';
+					element.css('cursor', 'e-resize');
 				}else{
-					element.style.cursor = 'auto';
+					element.css('cursor', 'auto');
 				}
 			}
 		});
@@ -116,17 +116,17 @@ function startUi(){ // run after webpage loaded
 		el.className = 'data-title';
 		el.innerHTML = element.dataset.title;
 		element.addEventListener("scroll", () => {
-			el.style.bottom = `-${element.scrollTop}px`
+			el.css('bottom', `-${element.scrollTop}px`)
 			if(element.scrollTop == 0 && element.scrollLeft == 0){
-				el.style.width = '100%';
+				el.css('width', '100%');
 			}else{
-				el.style.width = '0%';
+				el.css('width', '0%');
 			}
         }, { passive: true });
 		let DOMel = element.appendChild(el);
 		if(element.matches('*:last-child')){return;} // skips if it's the last child
 
-		DOMel.style.cursor = (isVSplit?"n-resize":"e-resize");
+		DOMel.css('cursor', (isVSplit?"n-resize":"e-resize"));
 		DOMel.addEventListener("mousedown", () => {
 			mouseDownFunct(element, isVSplit);
 		});
@@ -218,27 +218,67 @@ function startUi(){ // run after webpage loaded
 
 	$all(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
 		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
-		element.style.flex = `0 0 ${element.dataset.height}`;
+		element.css('flex', `0 0 ${element.dataset.height}`);
 	});
 	$all(':is(.hSplit, .vSplit)[data-width]').forEach(element => {
 		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
-		element.style.flex = `0 0 ${element.dataset.width}`;
+		element.css('flex', `0 0 ${element.dataset.width}`);
 	});
+
+	setInterval(() => {
+		$all('.jsClock').forEach(element => {
+			var checkTime = function(i) {
+				if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+				return i;
+			};
+			let today = new Date(),
+			h = today.getHours(),
+			m = today.getMinutes(),
+			s = today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			element.innerHTML =  h + ":" + m + ":" + s;
+		});
+	}, 1000);
+
+	$('.statusBar').oncontextmenu = function(){
+		css('--status-bar-open', 0)
+		return false;
+	}
+	$('.menuBar').oncontextmenu = function(){
+		css('--menu-bar-open', 0)
+		return false;
+	}
+
+	window.oncontextmenu = function(e){
+		if(e.clientY <= 10 & css('--menu-bar-open') < 1){
+			css('--menu-bar-open', '');
+			return false;
+		}else if(e.clientY >= window.innerHeight-10 & css('--status-bar-open') < 1){
+			css('--status-bar-open', '');
+			return false;
+		}
+		return true;
+	}
 
 	$all('*[data-tooltip]').forEach(element => {
 		element.addEventListener("mouseover", event => {
 			if(!$(':root:has(*[data-tooltip]:hover)')){return;}
 			let tooltip = $('#tooltip');
-			tooltip.style.top = `${event.clientY - tooltip.clientHeight - 5}px`;
-			tooltip.style.left = `${event.clientX + 5}px`;
+			tooltip.css('top', `${event.clientY - tooltip.clientHeight - 5}px`);
+			tooltip.css('left', `${event.clientX + 5}px`);
 			tooltip.innerHTML = $('*[data-tooltip]:hover').dataset.tooltip;
 		});
 	});
 
-	if(hasURLParam('lolcat')){
+	$('#statusMsg').addEventListener('click', () => {
+		$('#statusMsg').innerHTML = '';
+	})
+
+	if(hasURLParam('lolcat')){	
 		let lolCatTimerGG = 0;
 		setInterval(() => {
-			cssVar('accent-color', `hsl(${lolCatTimerGG},100%,50%)`);
+			css('--accent-color', `hsl(${lolCatTimerGG},100%,50%)`);
 			lolCatTimerGG += 5;
 			if(lolCatTimerGG > 360){
 				lolCatTimerGG -= 360;
@@ -248,14 +288,14 @@ function startUi(){ // run after webpage loaded
 
 	setTimeout(() => {
 		if(prefersReducedMotion != true){
-			$('#loadingUi').style.height = '0px';
+			$('#loadingUi').css('height', '0px');
 		}
-		$('#loadingUi').style.opacity = '0';
+		$('#loadingUi').css('opacity', '0');
 		setTimeout(() => {
 			$('#loadingUi').remove();
 		}, (prefersReducedMotion?1000:5000))
 	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';
-	$('#stratiiIntroLogo').style.color = 'var(--accent-color)';
+	$('#stratiiIntroLogo').css('color', 'var(--accent-color)');
 }

@@ -301,28 +301,39 @@ function loadFromCookies(){
 function clearSave(){
 	setURLHash('');
 }
-function cssVar(name, val = null, obj = ':root', removeType = false){
+Element.prototype.css = function(name, val = null, options = {resolveToNum: false, removeProperty: false}){
+	let passedOptions = options;
+	passedOptions.obj = this;
+	css(name, val, passedOptions)
+};
+function css(name, val = null, options = {removeProperty: false, resolveToNum: false, obj: $(':root')}){
+	let obj = (options.obj?options.obj:$(':root'));
 	if(val != null){
-		$(obj).style.setProperty('--' + name, val);
+		obj.style.setProperty(name, val);
 	}
-	else{
-		let output = getComputedStyle($(obj)).getPropertyValue('--' + name);
-		return (removeType?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);
+	else if(val == null && options.removeProperty){
+		obj.style.removeProperty(name);
+	}else{
+		let output = getComputedStyle(obj).getPropertyValue(name);
+		return (options.resolveToNum?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);
 	}
 }
 function saveCSSVars(){
 	let varList = ['bg-color','dark-accent-color','accent-color','yellow-color','red-color','split-border-thickness','title-size','menu-bar-height','status-bar-height']
 	s.cssVars = []
 	varList.forEach(item => {
-		s.cssVars.push({name:item,val:cssVar(item)});
+		s.cssVars.push({name:item,val:css('--' + item)});
 	});
 }
 function setCSSVars(){
 	if(!s.cssVars){statusErrMsg('cssVarsNotSaved','custom ui properties will not be restored');return;}
 	s.cssVars.forEach(v => {
-		cssVar(v.name,v.val);
+		css('--' + v.name,v.val);
 	})
 
+}
+Number.prototype.toWorldXCords = function(){
+	// todo
 }
 function wtxCords(localx, objx = 0, objzoom = 1, camX = s.cameraX, camZoom = s.cameraZoom){
 	let objX = camX + objx * camZoom,
@@ -347,17 +358,25 @@ function ctScale(num, camZoom = s.cameraZoom){
 	return num / camZoom;
 }
 function createStatusMsg(msg, tooltip = 'no info more provided', color = ''){
-	
+	if(tooltip == ''){tooltip = 'no info more provided';}
+	let element = $('#statusMsg');
+	element.innerHTML = msg;
+	element.dataset.tooltip = tooltip;
+	element.css('--c', color);
+	setTimeout(() => {
+		if(element.innerHTML == msg){
+			element.innerHTML = '';
+		}
+	}, 10000);
 }
-function statusActionMsg(msg, tooltip = ''){
-
+function statusMsg(msg, tooltip = ''){
+	createStatusMsg(msg, tooltip);
 }
 function statusWarnMsg(msg, tooltip = ''){
-	// shi-- hit the fan, shut it all dowon
-	console.warn(`!warnMsg: ${msg}` + (tooltip != 'no info more provided'?` /// tooltip ${tooltip}`:''));
+	createStatusMsg('Warning: ' + msg, tooltip, 'var(--yellow-color)');
 }
 function statusErrMsg(msg, tooltip = ''){
-
+	createStatusMsg('Error: ' + msg, tooltip, 'var(--red-color)');
 }
 
 function renderGround(context, canvasWidth, thickness, height, color = {r,g,b,a}, camY, camZoom)
@@ -405,7 +424,6 @@ function renderTic()
 		renderObj(mainContext, obj, s.cameraX, s.cameraY, s.cameraZoom);
 	});
 	if(s.showHitboxes == true){
-		// idk why this has an extra property
 		objs.forEach((obj, index) => {
 			mainContext.beginPath();
 			let color = (index/objs.length)*360;

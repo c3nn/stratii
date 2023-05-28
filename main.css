@@ -183,6 +183,14 @@
 :root:has(* .menuBar:hover){
 	--menu-bar-open: 3;
 }
+
+:is(.statusBar, .menuBar) .statusMsg{
+	height: var(--status-bar-height-variable-limited);
+	color: var(--c, var(--accent-color));
+	padding: 0px 5px 0px 5px;
+	cursor: pointer;
+}
+
 .hSplit, .vSplit{
 	position: relative;
 	margin: 0px;
@@ -226,6 +234,7 @@
 	height: calc(50% - 36px);
 	font-size: calc(var(--title-size) * 1.5);
 }
+
 :is(.vSplit, .hSplit) .indent{
 	border-left: solid var(--split-border-thickness) var(--accent-color);
 	padding-left: 2px;
@@ -276,6 +285,7 @@
 	direction: rtl;
 	text-decoration: underline;
 }
+
 .keybind{
 	display: inline-block;
 	font-family: JetBrains Mono;
