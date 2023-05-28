@@ -301,18 +301,15 @@ function loadFromCookies(){
 function clearSave(){
 	setURLHash('');
 }
-Element.prototype.css = function(name, val = null, options = {resolveToNum: false, removeProperty: false}){
+Element.prototype.css = function(name, val = null, options = {resolveToNum: false}){
 	let passedOptions = options;
 	passedOptions.obj = this;
 	css(name, val, passedOptions)
 };
-function css(name, val = null, options = {removeProperty: false, resolveToNum: false, obj: $(':root')}){
+function css(name, val = null, options = {resolveToNum: false, obj: $(':root')}){
 	let obj = (options.obj?options.obj:$(':root'));
 	if(val != null){
 		obj.style.setProperty(name, val);
-	}
-	else if(val == null && options.removeProperty){
-		obj.style.removeProperty(name);
 	}else{
 		let output = getComputedStyle(obj).getPropertyValue(name);
 		return (options.resolveToNum?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);

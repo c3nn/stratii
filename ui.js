@@ -10,7 +10,7 @@ var isGlobalMouseDown = false;
 window.addEventListener("mousedown", () => { isGlobalMouseDown = true; });
 window.addEventListener("mouseup", () => { isGlobalMouseDown = false; });
 function userSelectOff(){ $(':root').css('user-select','none'); }
-function userSelectOn(){ $(':root').css('user-select', null); }
+function userSelectOn(){ $(':root').css('user-select', ''); }
 
 var selectedMoveObjIndex = -1, // polish up
 selectedObjIndex = 0; // todo
