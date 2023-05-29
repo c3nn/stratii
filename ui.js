@@ -287,13 +287,14 @@ function startUi(){ // run after webpage loaded
 	}
 
 	setTimeout(() => {
-		if(prefersReducedMotion != true){
-			$('#loadingUi').css('height', '0px');
-		}
-		$('#loadingUi').css('opacity', '0');
+		$('#loadingUi').css('filter', 'brightness(0)');
 		setTimeout(() => {
-			$('#loadingUi').remove();
-		}, (prefersReducedMotion?1000:5000))
+			$('#loadingUi').css('transition', 'all 1s');
+			$('#loadingUi').css('opacity', '0');
+			setTimeout(() => {
+				$('#loadingUi').remove();
+			}, (prefersReducedMotion?1000:3000))
+		}, (prefersReducedMotion?1000:3000));
 	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';
