@@ -329,18 +329,20 @@ function setCSSVars(){
 	})
 
 }
-Number.prototype.toWorldXCords = function(){
-	// todo
+Number.prototype.toCanvasXCords = function(offsetX = 0, offsetZoom = 1, camX = s.cameraX, camZoom = s.cameraZoom){
+	let objX = camX + offsetX * camZoom,
+	newZoom = offsetZoom * camZoom;
+	return objX + this * newZoom;
 }
-function wtxCords(localx, objx = 0, objzoom = 1, camX = s.cameraX, camZoom = s.cameraZoom){
-	let objX = camX + objx * camZoom,
-	objZoom = objzoom * camZoom;
-	return objX + localx * objZoom;
+Number.prototype.toCanvasYCords = function(offsetY = 0, offsetZoom = 1, camY = s.cameraY, camZoom = s.cameraZoom){
+	let objY = camY + offsetY * camZoom,
+	newZoom = offsetZoom * camZoom;
+	return objY + this * newZoom;
 }
 function wtyCords(localy, objy = 0, objzoom = 1, camY = s.cameraY, camZoom = s.cameraZoom){
 	let objY = camY + objy * camZoom,
 	objZoom = objzoom * camZoom;
-	return objY + localy * objZoom;
+	return objY + 0 * objZoom;
 }
 function wtScale(num, objzoom = 1, camZoom = s.cameraZoom){
 	return num * objzoom * camZoom;
@@ -427,9 +429,9 @@ function renderTic()
 			mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
 			mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
 			if(obj.phys.useRect == true){
-				mainContext.rect(wtxCords(obj.x), wtyCords(obj.y), wtScale(obj.phys.width, obj.phys.scale), wtScale(obj.phys.height, obj.phys.scale));
+				mainContext.rect(obj.x.toCanvasXCords(), wtyCords(obj.y), wtScale(obj.phys.width, obj.phys.scale), wtScale(obj.phys.height, obj.phys.scale));
 			}else{
-				mainContext.arc(wtxCords(obj.x), wtyCords(obj.y), wtScale(obj.phys.radius, obj.phys.scale), 0, 2 * Math.PI)
+				mainContext.arc(obj.x.toCanvasXCords(), wtyCords(obj.y), wtScale(obj.phys.radius, obj.phys.scale), 0, 2 * Math.PI)
 			}
 			mainContext.stroke();
 			mainContext.fill();

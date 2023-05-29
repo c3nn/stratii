@@ -1,3 +1,4 @@
+/** setup */
 @font-face {
 	font-family: "materialIcons";
 	src: local("Material Symbols Rounded"), url("assets/googleMaterialIcons.woff2");
@@ -47,7 +48,7 @@
 	--menu-bar-open: 0;
 	--menu-bar-height: 25px;
 	--menu-bar-height-variable: calc(var(--menu-bar-height) * var(--menu-bar-open));
-	--status-bar-height-variable-limited: min(var(--menu-bar-height-variable), calc(var(--menu-bar-height) * 1.5));
+	--menu-bar-height-variable-limited: min(var(--menu-bar-height-variable), calc(var(--menu-bar-height) * 1.5));
 	--status-bar-open: 1;
 	--status-bar-height: 13px;
 	--status-bar-height-variable: calc(var(--status-bar-height) * var(--status-bar-open));
@@ -64,10 +65,6 @@
 	background: transparent;
 	display: none;
 }
-*[data-jetbrains]{
-	font-family: Jetbrains mono;
-}
-
 @media (prefers-reduced-motion: reduce) {
 	#loadingUi, #loadingUi *{
 		animation: none !important;
@@ -91,11 +88,10 @@
 		color: var(--accent-color);
 		z-index: 1;
 	}
-	.statusBar *{
+	:is(.statusBar, .menuBar) *{
 		opacity: 1 !important;
 	}
-}	
-
+}
 @keyframes intro {
 	0%{letter-spacing: 3vh;}
 	100%{letter-spacing: 0vh;}
@@ -107,6 +103,11 @@
 @keyframes introEnd {
 	0%{letter-spacing: -1vh;}
 	100%{letter-spacing: 0vh;}
+}
+
+/** general */
+*[data-jetbrains]{
+	font-family: Jetbrains mono;
 }
 *[data-tooltip]:hover{
 	position: relative;
@@ -129,7 +130,20 @@
 	opacity: 1;
 	transition-delay: 1s;
 }
-.mainCanvas{
+.keybind{
+	display: inline-block;
+	font-family: JetBrains Mono;
+	color: var(--bg-color);
+	scale: 0.9;
+	background: var(--accent-color);
+	padding: 2px;
+	border: solid transparent 0px;
+	border-radius: 5px;
+}
+.keybind:before{content: '[';}
+.keybind:after{content: ']';}
+
+#mainCanvas{
 	width: 100%;
 	height: 100%;
 	background: transparent;
@@ -151,7 +165,9 @@
 	flex-direction: column;
 	align-items: center;
 }
-.statusBar, .menuBar{
+
+/** statusBar / menuBar */
+#statusBar, #menuBar{
 	--timing-fuct: var(--timing-func-overshoot);
 	position: absolute;
 	display: flex;
@@ -166,31 +182,31 @@
 	justify-content: space-between;
 	align-items: center;
 }
-:is(.statusBar, .menuBar) .symbol{
+:is(#statusBar, #menuBar) .symbol{
 	font-size: calc(var(--status-bar-height-variable-limited) * 0.8);
 	position: relative;
 	margin-right: 2px;
 	top: calc(var(--status-bar-height-variable-limited) * 0.08);
 }
-:root:has(* .statusBar:hover){
+:root:has(* #statusBar:hover){
 	--status-bar-open: 3;
 }
-.menuBar{
+#menuBar{
 	top: 0px;
 	height: var(--menu-bar-height-variable);
 	font-size: var(--menu-bar-height-variable-limited);
 }
-:root:has(* .menuBar:hover){
+:root:has(* #menuBar:hover){
 	--menu-bar-open: 3;
 }
-
-:is(.statusBar, .menuBar) .statusMsg{
+:is(#statusBar, #menuBar) .statusMsg{
 	height: var(--status-bar-height-variable-limited);
 	color: var(--c, var(--accent-color));
 	padding: 0px 5px 0px 5px;
 	cursor: pointer;
 }
 
+/** splits */
 .hSplit, .vSplit{
 	position: relative;
 	margin: 0px;
@@ -205,7 +221,7 @@
 	border: none;
 	border-bottom: solid var(--split-border-thickness) var(--dark-accent-color);
 }
-.hSplit:last-of-type, .vSplit:last-of-type{
+:is(.hSplit, .vSplit):last-of-type{
 	border: none;
 }
 .hSplit:has(.vSplit), .vSplit:has(.hSplit){
@@ -235,6 +251,7 @@
 	font-size: calc(var(--title-size) * 1.5);
 }
 
+/** splits' elements */
 :is(.vSplit, .hSplit) .indent{
 	border-left: solid var(--split-border-thickness) var(--accent-color);
 	padding-left: 2px;
@@ -286,18 +303,7 @@
 	text-decoration: underline;
 }
 
-.keybind{
-	display: inline-block;
-	font-family: JetBrains Mono;
-	color: var(--bg-color);
-	scale: 0.9;
-	background: var(--accent-color);
-	padding: 2px;
-	border: solid transparent 0px;
-	border-radius: 5px;
-}
-.keybind:before{content: '[';}
-.keybind:after{content: ']';}
+/** windows */
 .overlayWindow{
 	--timingFunc: var(--timing-func-overshoot);
 	--duration: 0.7s;

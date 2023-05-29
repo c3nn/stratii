@@ -241,12 +241,12 @@ function startUi(){ // run after webpage loaded
 		});
 	}, 1000);
 
-	$('.statusBar').oncontextmenu = function(){
-		css('--status-bar-open', 0)
+	$('#statusBar').oncontextmenu = function(){
+		css('--status-bar-open', 0);
 		return false;
 	}
-	$('.menuBar').oncontextmenu = function(){
-		css('--menu-bar-open', 0)
+	$('#menuBar').oncontextmenu = function(){
+		css('--menu-bar-open', 0);
 		return false;
 	}
 
@@ -287,14 +287,13 @@ function startUi(){ // run after webpage loaded
 	}
 
 	setTimeout(() => {
-		$('#loadingUi').css('filter', 'brightness(0)');
+		if(prefersReducedMotion != true){
+			$('#loadingUi').css('height', '0px');
+		}
+		$('#loadingUi').css('opacity', '0');
 		setTimeout(() => {
-			$('#loadingUi').css('transition', 'all 1s');
-			$('#loadingUi').css('opacity', '0');
-			setTimeout(() => {
-				$('#loadingUi').remove();
-			}, (prefersReducedMotion?1000:3000))
-		}, (prefersReducedMotion?1000:3000));
+			$('#loadingUi').remove();
+		}, (prefersReducedMotion?1000:5000))
 	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';

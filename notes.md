@@ -42,7 +42,7 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 - add obj list
 - ! fix the camera zooming... don't even ask, idk, wait i might know, nvm, wait i just might know
 - fix extra momentum when droping objs
-- ? add tabs (like the Unity Editor)
+- ? add tabs (like the Unity Editor) (idea: use a container div on the splits and have the corect one show based on their number like .split[data-title==PARENT-data-selected] or something)
 - ? iframe about popup button (on status bar)
 - ui is strange on chromebook?
 - ? menu bar
