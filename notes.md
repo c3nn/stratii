@@ -32,8 +32,8 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 ## TODO misc.
 - ? fix function loading from url hash
 - ? FireFox support
-- Mar10 day, March 10th easter egg (Super Stratii Maker)
-- ? redo ct...() and wt...() into prototype functions so it can be USED.likeThis() [index.js@340]
+- ? Mar10 day, March 10th easter egg (Super Stratii Maker)
+- ? add ball drop on new years
 
 ## TODO ui
 - ? polish ms control w/ phys & render tics

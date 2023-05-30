@@ -231,13 +231,12 @@ function startUi(){ // run after webpage loaded
 				if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
 				return i;
 			};
-			let today = new Date(),
-			h = today.getHours(),
-			m = today.getMinutes(),
-			s = today.getSeconds();
-			m = checkTime(m);
-			s = checkTime(s);
-			element.innerHTML =  h + ":" + m + ":" + s;
+			let now = new Date(),
+			h = now.getHours(),
+			m = now.getMinutes(),
+			s = now.getSeconds(),
+			msg = (h == 0 && m <= 5?'<span style="color: white; text-decoration: underline;"> be sure to rest soon, ok </span>':'');
+			element.innerHTML = msg + (h > 12?h-12:h) + ":" + checkTime(m) + ":" + checkTime(s) + (h > 12?'PM':'AM');
 		});
 	}, 1000);
 

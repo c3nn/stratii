@@ -196,9 +196,6 @@
 	height: var(--menu-bar-height-variable);
 	font-size: var(--menu-bar-height-variable-limited);
 }
-:root:has(* #menuBar:hover){
-	--menu-bar-open: 3;
-}
 :is(#statusBar, #menuBar) .statusMsg{
 	height: var(--status-bar-height-variable-limited);
 	color: var(--c, var(--accent-color));

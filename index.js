@@ -27,9 +27,9 @@ String.prototype.delChar = function(sel){return this.replace(sel,'')};
 var s = {
 	canvasType: 'base',
 	gravity: 0.1,
-	cameraX: 100,
-	cameraY: 50,
-	cameraZoom: 0.3,
+	cameraX: 0,
+	cameraY: -250,
+	cameraZoom: 0.4,
 	showHitboxes: true,
 	floorHeight: 1000,
 	floorThickness: 100,
@@ -329,20 +329,13 @@ function setCSSVars(){
 	})
 
 }
-Number.prototype.toCanvasXCords = function(offsetX = 0, offsetZoom = 1, camX = s.cameraX, camZoom = s.cameraZoom){
-	let objX = camX + offsetX * camZoom,
-	newZoom = offsetZoom * camZoom;
-	return objX + this * newZoom;
+Number.prototype.toCanvasXCords = function(camX = s.cameraX, camZoom = s.cameraZoom){
+	var canvasZoomPosX = mainCanvas.width / 2;
+	return (camX + this) + (((camX + this) - canvasZoomPosX)*(camZoom-1));
 }
-Number.prototype.toCanvasYCords = function(offsetY = 0, offsetZoom = 1, camY = s.cameraY, camZoom = s.cameraZoom){
-	let objY = camY + offsetY * camZoom,
-	newZoom = offsetZoom * camZoom;
-	return objY + this * newZoom;
-}
-function wtyCords(localy, objy = 0, objzoom = 1, camY = s.cameraY, camZoom = s.cameraZoom){
-	let objY = camY + objy * camZoom,
-	objZoom = objzoom * camZoom;
-	return objY + 0 * objZoom;
+Number.prototype.toCanvasYCords = function(camY = s.cameraY, camZoom = s.cameraZoom){
+	var canvasZoomPosY = mainCanvas.height / 2;
+	return (camY + this) + (((camY + this) - canvasZoomPosY)*(camZoom-1));
 }
 function wtScale(num, objzoom = 1, camZoom = s.cameraZoom){
 	return num * objzoom * camZoom;
@@ -378,13 +371,33 @@ function statusErrMsg(msg, tooltip = ''){
 	createStatusMsg('Error: ' + msg, tooltip, 'var(--red-color)');
 }
 
-function renderGround(context, canvasWidth, thickness, height, color = {r,g,b,a}, camY, camZoom)
+function renderTexture(texture, width, height, x, y, scale = 1, canvas = mainContext)
 {
-	context.fillStyle = colorObjToRGB(color);
-	context.fillRect(0,camY + height*camZoom, canvasWidth, thickness*camZoom, camY + height*camZoom);
+	canvas.beginPath();
+	canvas.lineTo((0).toCanvasXCords(),(0).toCanvasYCords());
+	canvas.lineTo((100).toCanvasXCords(),(100).toCanvasYCords());
+	canvas.lineTo((100).toCanvasXCords(),(0).toCanvasYCords());
+	canvas.lineTo((50).toCanvasXCords(),(-20).toCanvasYCords());
+	canvas.fill();
 }
 
-function renderObj(context, obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {width: 1, height: 1, color: [0,0,0,0], normal: [0,0,0,0]}}}, camX = 0, camY = 0, camZoom = 1, useNormals = false)
+function renderObjTexture(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {width: 1, height: 1, color: [0,0,0,0], normal: [0,0,0,0]}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
+{
+	let objX = camX + Math.round((obj.x + obj.vis.yOffset) * camZoom),
+	objY = camY + Math.round((obj.y + obj.vis.yOffset )* camZoom),
+	objZoom = Math.round(obj.vis.scale * camZoom);
+	for (let i = 0; i < obj.vis.texture.width*obj.vis.texture.height; i++) {
+		let tPix = getFromImageDataI(i,(useNormals == true?obj.vis.texture.normal:obj.vis.texture.color));
+		drawPixel(objX + (i%obj.vis.texture.width) * objZoom , objY + Math.floor(i/obj.vis.texture.width) * objZoom, tPix, context, objZoom);
+	}
+}
+
+function renderObjModel(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, mesh: {file: [[{x: 0, y: 0}]], color: {r,g,b}, borderWidth: 1}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
+{
+
+}
+
+function renderObj(context, obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {}}}, camX = 0, camY = 0, camZoom = 1, useNormals = false)
 {
 	if(obj.vis.useTexture == true){
 		let objX = camX + Math.round((obj.x + obj.vis.yOffset) * camZoom),
@@ -417,38 +430,41 @@ function renderTic()
 		mainContext.fillRect(0,0,mainCanvas.width,mainCanvas.height);
 	}
 	if(s.floorEnabled == true){
-		renderGround(mainContext, mainCanvas.width, s.floorThickness, s.floorHeight, s.floorColor, s.cameraY, s.cameraZoom);
+		mainContext.fillStyle = colorObjToRGB(s.floorColor);
+		mainContext.fillRect(0,(s.floorHeight).toCanvasYCords(), mainCanvas.width, s.floorThickness*s.cameraZoom);
 	}
-	objs.forEach(obj => {
-		renderObj(mainContext, obj, s.cameraX, s.cameraY, s.cameraZoom);
-	});
-	if(s.showHitboxes == true){
-		objs.forEach((obj, index) => {
-			mainContext.beginPath();
-			let color = (index/objs.length)*360;
-			mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
-			mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
-			if(obj.phys.useRect == true){
-				mainContext.rect(obj.x.toCanvasXCords(), wtyCords(obj.y), wtScale(obj.phys.width, obj.phys.scale), wtScale(obj.phys.height, obj.phys.scale));
-			}else{
-				mainContext.arc(obj.x.toCanvasXCords(), wtyCords(obj.y), wtScale(obj.phys.radius, obj.phys.scale), 0, 2 * Math.PI)
-			}
-			mainContext.stroke();
-			mainContext.fill();
-		});
-	}
+	// objs.forEach(obj => {
+	// 	renderObj(mainContext, obj, s.cameraX, s.cameraY, s.cameraZoom);
+	// });
+	// if(s.showHitboxes == true){
+	// 	objs.forEach((obj, index) => {
+	// 		mainContext.beginPath();
+	// 		let color = (index/objs.length)*360;
+	// 		mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
+	// 		mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
+	// 		if(obj.phys.useRect == true){
+	// 			mainContext.rect(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), wtScale(obj.phys.width, obj.phys.scale), wtScale(obj.phys.height, obj.phys.scale));
+	// 		}else{
+	// 			mainContext.arc(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), wtScale(obj.phys.radius, obj.phys.scale), 0, 2 * Math.PI)
+	// 		}
+	// 		mainContext.stroke();
+	// 		mainContext.fill();
+	// 	});
+	// }
 
-	objs.forEach(obj => {
-		if(!obj.func || obj.func.useFunctions == false){return;}
-		obj.func.renderfunctions.forEach((func) => {
-			try {
-				func(obj);
-			} catch (error) {
-				obj.func.catch(error);
-			}
-		});
-	});
+	// objs.forEach(obj => {
+	// 	if(!obj.func || obj.func.useFunctions == false){return;}
+	// 	obj.func.renderfunctions.forEach((func) => {
+	// 		try {
+	// 			func(obj);
+	// 		} catch (error) {
+	// 			obj.func.catch(error);
+	// 		}
+	// 	});
+	// });
 	
+	renderTexture(objs[0].vis.texture.color, 4, 4, 0, 0)
+
 	framesRendered++
 }
 
