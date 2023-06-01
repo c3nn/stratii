@@ -300,6 +300,47 @@
 	text-decoration: underline;
 }
 
+/** tabs */
+.tabCont{
+	position: relative;
+	overflow: hidden;
+}
+.tabCont .tab:not([data-show=true]){
+	display: none;
+}
+.tabCont .tab{
+	position: absolute;
+	height: calc(100% - var(--title-size));
+	width: 100%;
+	overflow: auto;
+}
+.tabCont .tabBar{
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	bottom: 0px;
+	height: var(--title-size);
+	width: 100%;
+	background: var(--dark-accent-color);
+	font-size: var(--title-size);
+}
+.tabCont .tabBar .tabButton{
+	--title-half: calc(var(--title-size) * 0.5);
+	border: solid transparent 0px;
+	border-radius: 0px 0px var(--title-half) var(--title-half);
+	background: var(--bg-color);
+	color: var(--accent-color);
+	font-size: var(--title-size);
+	padding: 0px var(--title-half) 0px var(--title-half);
+	margin-right: calc(var(--title-size) * 0.25);
+	user-select: none;
+	cursor: pointer;
+}
+.tabCont .tabBar .tabButton:last-child{
+	margin-right: 0px;
+}
+
 /** windows */
 .overlayWindow{
 	--timingFunc: var(--timing-func-overshoot);

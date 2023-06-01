@@ -20,8 +20,10 @@ lightTexture = [
 	0,0,0,0, 0,0,0,0, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,0, 0,0,0,0,
 ];
 mainContext.imageSmoothingEnabled = false;
-const $ = function(selector){return document.querySelector(selector);},
-$all = function(selector){return document.querySelectorAll(selector);};
+const $ = function(selector, element = document){return element.querySelector(selector);},
+$all = function(selector, element = document){return element.querySelectorAll(selector);};
+Element.prototype.$ = function(selector){return $(selector, this);}
+Element.prototype.$all = function(selector){return $all(selector, this);}
 String.prototype.delChar = function(sel){return this.replace(sel,'')};
 
 var s = {
@@ -183,7 +185,7 @@ function deleteCookie(cname){
 	if(!hasCookie(cname)){return}
 	setCookie(cname, '', 0);
 }
-function bezier(points, t) { // never even used... why here?
+function bezier(points, t) {
 	var n = points.length - 1;
 	var b = [];
 	for (var i = 0; i <= n; i++) {
@@ -327,27 +329,33 @@ function setCSSVars(){
 	s.cssVars.forEach(v => {
 		css('--' + v.name,v.val);
 	})
-
 }
+var canvasZoomPosX = mainCanvas.width / 2,
+canvasZoomPosY = mainCanvas.height / 2;
 Number.prototype.toCanvasXCords = function(camX = s.cameraX, camZoom = s.cameraZoom){
-	var canvasZoomPosX = mainCanvas.width / 2;
-	return (camX + this) + (((camX + this) - canvasZoomPosX)*(camZoom-1));
+	let totalX = camX + this;
+	return totalX + ((totalX - canvasZoomPosX)*(camZoom - 1));
 }
 Number.prototype.toCanvasYCords = function(camY = s.cameraY, camZoom = s.cameraZoom){
-	var canvasZoomPosY = mainCanvas.height / 2;
-	return (camY + this) + (((camY + this) - canvasZoomPosY)*(camZoom-1));
+	let totalY = camY + this;
+	return totalY + ((totalY - canvasZoomPosY)*(camZoom - 1));
 }
-function wtScale(num, objzoom = 1, camZoom = s.cameraZoom){
-	return num * objzoom * camZoom;
+Number.prototype.toCanvasScale = function(camZoom = s.cameraZoom){
+	return this * camZoom;
 }
-function ctxCords(x, camX = s.cameraX, camZoom = s.cameraZoom){
-	return (x - camX) / camZoom;
+Number.prototype.toWorldXCords = function (camX = s.cameraX, camZoom = s.cameraZoom) {
+	return 0;
+	//! I DONT KNOW
+	// return ((this - canvasZoomPosX)/ - camZoom)-camX;
+	// return (this-canvasZoomPosX)/(camZoom-1)-camX;
+};
+Number.prototype.toWorldYCords = function(camY = s.cameraY, camZoom = s.cameraZoom){
+	// return -(this/(camZoom-1))-camY;
+	//! I DONT KNOW AAAAAA
+	return 0;
 }
-function ctyCords(y, camY = s.cameraY, camZoom = s.cameraZoom){
-	return (y - camY) / camZoom;
-}
-function ctScale(num, camZoom = s.cameraZoom){
-	return num / camZoom;
+Number.prototype.toWorldScale = function(camZoom = s.cameraZoom){
+	return this / camZoom;
 }
 function createStatusMsg(msg, tooltip = 'no info more provided', color = ''){
 	if(tooltip == ''){tooltip = 'no info more provided';}
@@ -373,13 +381,28 @@ function statusErrMsg(msg, tooltip = ''){
 
 function renderTexture(texture, width, height, x, y, scale = 1, canvas = mainContext)
 {
+	for (let i = 0; i < width*height; i++) {
+		let pixelColor = getFromImageDataI(i, texture);
+		let pixelX = (i%width);
+		let pixelY = Math.floor(i/height);
+		drawPixel((x + (pixelX*scale)).toCanvasXCords(), (y + (pixelY*scale)).toCanvasYCords(), pixelColor, canvas, scale.toCanvasScale());
+	}
+
 	canvas.beginPath();
 	canvas.lineTo((0).toCanvasXCords(),(0).toCanvasYCords());
 	canvas.lineTo((100).toCanvasXCords(),(100).toCanvasYCords());
 	canvas.lineTo((100).toCanvasXCords(),(0).toCanvasYCords());
-	canvas.lineTo((50).toCanvasXCords(),(-20).toCanvasYCords());
+	canvas.fill();
+	canvas.beginPath();
+	canvas.fillStyle = 'red';
+	canvas.fillRect((0).toCanvasXCords(),(0).toCanvasYCords(),(10).toCanvasScale(),(1000).toCanvasScale())
 	canvas.fill();
 }
+
+var asdf = 0;
+mainCanvas.addEventListener('mousemove', event => {
+	asdf = event.clientX;
+});
 
 function renderObjTexture(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {width: 1, height: 1, color: [0,0,0,0], normal: [0,0,0,0]}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
 {
@@ -463,7 +486,7 @@ function renderTic()
 	// 	});
 	// });
 	
-	renderTexture(objs[0].vis.texture.color, 4, 4, 0, 0)
+	renderTexture(objs[0].vis.texture.color, 4, 4, 0, 0, 40)
 
 	framesRendered++
 }

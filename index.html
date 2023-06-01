@@ -11,18 +11,26 @@
 	<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 	<link rel="stylesheet" href="main.css">
 </head>
-<body onload="startMain();try{startUi();}catch(error){alert('warning: ui file missing or currupted');console.warn(error);document.querySelector('#loadingUi').style.display = 'none';}">
+<body onload="try {startMain();}catch(error){alert('warning: main JS file missing or currupted');console.warn(error);}try{startUi();}catch(error){alert('warning: ui JS file missing or currupted');console.warn(error);document.querySelector('#loadingUi').style.display = 'none';}">
 <div class="ui">
 	<div class="vSplit" data-height="55%">
-		<div class="hSplit" data-title="object properties" data-width="400px">
-			
+		<div class="hSplit tabCont" data-width="450px" style="--selectedTab: 'obj creator';">
+			<div class="tab" data-title="obj creator" data-show="true">
+				obj creator
+			</div>
+			<div class="tab" data-title="obj editor">
+				obj editor
+			</div>
+			<div class="tab" data-title="obj list">
+				obj list
+			</div>
 		</div>
 		<div class="hSplit" style="overflow: hidden;">
 			<canvas id="mainCanvas" width="400" height="350"></canvas>
 		</div>
 	</div>
 	<div class="vSplit">
-		<div class="hSplit" data-title="hay" data-width="700px">
+		<div class="hSplit" data-title="hay" data-width="800px">
 			<div class="vSplit" data-height="160px">
 				<div class="hSplit" data-title="physics controles">
 					<div class="flex">
@@ -81,7 +89,7 @@
 	</div>
 	<div>
 		<span id="statusMsg" class="statusMsg" style="opacity: 0.7;" data-tooltip=""></span>
-		<span style="opacity: 0.4;">v207-beta</span>
+		<span style="opacity: 0.4;">v208-beta</span>
 		<span class="jsClock" style="opacity: 0.4;" data-tooltip="a clock">[clock]</span>
 		<a data-jetbrains style="opacity: 0.4; margin-right: 2px; text-decoration: none; color: var(--accent-color);" href="https://c3nn.com">c3nn</a>
 		<span id="settingsButton" style="display: none;" class="symbol">settings</span>

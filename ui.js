@@ -1,4 +1,4 @@
-const loadingText = document.querySelector('#loadingText');
+const loadingText = $('#loadingText');
 var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
 prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches,
 prefersContrastMore = window.matchMedia("(prefers-contrast: more)").matches;
@@ -53,7 +53,9 @@ function startUi(){ // run after webpage loaded
 	function canvasResize(){
 		mainCanvas.height = mainCanvas.clientHeight;
 		mainCanvas.width = mainCanvas.clientWidth;
-		renderTic()
+		canvasZoomPosX = mainCanvas.width / 2;
+		canvasZoomPosY = mainCanvas.height / 2;
+		renderTic();
 	}
 	canvasResize();
 	new ResizeObserver(canvasResize).observe(mainCanvas);
@@ -217,11 +219,11 @@ function startUi(){ // run after webpage loaded
 	});
 
 	$all(':is(.hSplit, .vSplit)[data-height]').forEach(element => {
-		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
+		if(element.matches('*:last-child')){statusWarnMsg('using [data-width] on :last-child may have unintended behavior')}
 		element.css('flex', `0 0 ${element.dataset.height}`);
 	});
 	$all(':is(.hSplit, .vSplit)[data-width]').forEach(element => {
-		if(element.matches('*:last-child')){warnMsg('using [data-width] on :last-child may have unintended behavior')}
+		if(element.matches('*:last-child')){statusWarnMsg('using [data-width] on :last-child may have unintended behavior')}
 		element.css('flex', `0 0 ${element.dataset.width}`);
 	});
 
@@ -272,7 +274,33 @@ function startUi(){ // run after webpage loaded
 
 	$('#statusMsg').addEventListener('click', () => {
 		$('#statusMsg').innerHTML = '';
-	})
+	});
+
+	$all('.tabCont').forEach(element => {
+		let isVSplit = (element.matches('.vSelector')?true:false),
+		newEl = document.createElement('div');
+		newEl.className = 'tabBar';
+		let DOMel = element.appendChild(newEl);
+		DOMel.css('cursor', (isVSplit?"n-resize":"e-resize"));
+		DOMel.addEventListener("mousedown", () => {
+			mouseDownFunct(element, isVSplit);
+		});
+	});
+	$all('.tabCont .tab').forEach(element => {
+		let newEl = document.createElement('span');
+		newEl.className = 'tabButton';
+		newEl.innerHTML = element.dataset.title;
+		let DOMel = element.parentElement.$('.tabBar').appendChild(newEl);
+		DOMel.addEventListener('click', () => {
+			element.parentElement.$all('.tab').forEach(el => {
+				if(el.dataset.title == newEl.innerHTML){
+					el.dataset.show = "true";
+				}else{
+					el.dataset.show = "false";
+				}
+			});
+		});
+	});
 
 	if(hasURLParam('lolcat')){	
 		let lolCatTimerGG = 0;
