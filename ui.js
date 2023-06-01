@@ -324,5 +324,5 @@ function startUi(){ // run after webpage loaded
 	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';
-	$('#stratiiIntroLogo').css('color', 'var(--accent-color)');
+	// $('#stratiiIntroLogo').css('color', 'var(--accent-color)');
 }

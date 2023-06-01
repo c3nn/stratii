@@ -141,9 +141,11 @@ objs = [
 		useTexture: false,
 		mesh: {
 			// useBezier: false,
-			file: [[{x: 0, y: 0},{x: 0, y: 3},{x: 3, y: 3}]],
-			color: {r: 146, g: 243, b: 76},
+			file: [{x: 0, y: 0},{x: 0, y: 3},{x: 3, y: 3}],
+			fillColor: {r: 146, g: 243, b: 76},
+			borderColor: {r: 0, g: 0, b: 0},
 			borderWidth: 2,
+			fill: true
 		},
 		scale: 50,
 		xOffset: 0,
@@ -379,48 +381,42 @@ function statusErrMsg(msg, tooltip = ''){
 	createStatusMsg('Error: ' + msg, tooltip, 'var(--red-color)');
 }
 
-function renderTexture(texture, width, height, x, y, scale = 1, canvas = mainContext)
+function renderTexture(texture, width, height, x, y, scale = 1, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom)
 {
-	for (let i = 0; i < width*height; i++) {
+	for(let i = 0; i < width*height; i++){
 		let pixelColor = getFromImageDataI(i, texture);
 		let pixelX = (i%width);
 		let pixelY = Math.floor(i/height);
-		drawPixel((x + (pixelX*scale)).toCanvasXCords(), (y + (pixelY*scale)).toCanvasYCords(), pixelColor, canvas, scale.toCanvasScale());
+		drawPixel((x + (pixelX*scale)).toCanvasXCords(camX, camZoom), (y + (pixelY*scale)).toCanvasYCords(camY, camZoom), pixelColor, canvas, scale.toCanvasScale(camZoom));
 	}
-
-	canvas.beginPath();
-	canvas.lineTo((0).toCanvasXCords(),(0).toCanvasYCords());
-	canvas.lineTo((100).toCanvasXCords(),(100).toCanvasYCords());
-	canvas.lineTo((100).toCanvasXCords(),(0).toCanvasYCords());
-	canvas.fill();
-	canvas.beginPath();
-	canvas.fillStyle = 'red';
-	canvas.fillRect((0).toCanvasXCords(),(0).toCanvasYCords(),(10).toCanvasScale(),(1000).toCanvasScale())
-	canvas.fill();
 }
 
-var asdf = 0;
-mainCanvas.addEventListener('mousemove', event => {
-	asdf = event.clientX;
-});
+function renderMesh(mesh, x, y, scale, canvas = mainContext)
+{
+	canvas.beginPath();
+	canvas.fillStyle = mesh.fillColor;
+	canvas.strokeStyle = mesh.borderColor;
+	canvas.strokeWidth = mesh.borderWidth;
+	mesh.file.forEach(vertex => {
+		canvas.lineTo((x + vertex.x*scale).toCanvasXCords(), (y + vertex.y*scale).toCanvasYCords());
+	});
+	if(mesh.fill == true){
+		canvas.fill();
+	}
+	canvas.stroke();
+}
 
 function renderObjTexture(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {width: 1, height: 1, color: [0,0,0,0], normal: [0,0,0,0]}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
 {
-	let objX = camX + Math.round((obj.x + obj.vis.yOffset) * camZoom),
-	objY = camY + Math.round((obj.y + obj.vis.yOffset )* camZoom),
-	objZoom = Math.round(obj.vis.scale * camZoom);
-	for (let i = 0; i < obj.vis.texture.width*obj.vis.texture.height; i++) {
-		let tPix = getFromImageDataI(i,(useNormals == true?obj.vis.texture.normal:obj.vis.texture.color));
-		drawPixel(objX + (i%obj.vis.texture.width) * objZoom , objY + Math.floor(i/obj.vis.texture.width) * objZoom, tPix, context, objZoom);
-	}
+	renderTexture((useNormals?obj.vis.texture.normal:obj.vis.texture.color), obj.vis.texture.width, obj.vis.texture.height, obj.x, obj.y, obj.vis.scale, canvas, camX, camY, camZoom);
 }
 
-function renderObjModel(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, mesh: {file: [[{x: 0, y: 0}]], color: {r,g,b}, borderWidth: 1}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
+function renderObjModel(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, mesh: {file: [{x: 0, y: 0}], fillColor: {r,g,b}, borderColor: {r,g,b}, borderWidth: 2, fill: true}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
 {
-
+	renderMesh(obj.vis.mesh, obj.x+obj.vis.xOffset, obj.y+obj.vis.yOffset, obj.vis.scale, canvas);
 }
 
-function renderObj(context, obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {}}}, camX = 0, camY = 0, camZoom = 1, useNormals = false)
+function renderObj(context, obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {}}}, camX = 0, camY = 0, camZoom = 1, useNormals = false) // depreciated
 {
 	if(obj.vis.useTexture == true){
 		let objX = camX + Math.round((obj.x + obj.vis.yOffset) * camZoom),
@@ -456,37 +452,41 @@ function renderTic()
 		mainContext.fillStyle = colorObjToRGB(s.floorColor);
 		mainContext.fillRect(0,(s.floorHeight).toCanvasYCords(), mainCanvas.width, s.floorThickness*s.cameraZoom);
 	}
-	// objs.forEach(obj => {
-	// 	renderObj(mainContext, obj, s.cameraX, s.cameraY, s.cameraZoom);
-	// });
-	// if(s.showHitboxes == true){
-	// 	objs.forEach((obj, index) => {
-	// 		mainContext.beginPath();
-	// 		let color = (index/objs.length)*360;
-	// 		mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
-	// 		mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
-	// 		if(obj.phys.useRect == true){
-	// 			mainContext.rect(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), wtScale(obj.phys.width, obj.phys.scale), wtScale(obj.phys.height, obj.phys.scale));
-	// 		}else{
-	// 			mainContext.arc(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), wtScale(obj.phys.radius, obj.phys.scale), 0, 2 * Math.PI)
-	// 		}
-	// 		mainContext.stroke();
-	// 		mainContext.fill();
-	// 	});
-	// }
 
-	// objs.forEach(obj => {
-	// 	if(!obj.func || obj.func.useFunctions == false){return;}
-	// 	obj.func.renderfunctions.forEach((func) => {
-	// 		try {
-	// 			func(obj);
-	// 		} catch (error) {
-	// 			obj.func.catch(error);
-	// 		}
-	// 	});
-	// });
-	
-	renderTexture(objs[0].vis.texture.color, 4, 4, 0, 0, 40)
+	objs.forEach(obj => {
+		if(obj.vis.useTexture == true){
+			renderObjTexture(obj);
+		}else{
+			renderObjModel(obj);
+		}
+	});
+
+	if(s.showHitboxes == true){
+		objs.forEach((obj, index) => {
+			mainContext.beginPath();
+			let color = (index/objs.length)*360;
+			mainContext.strokeStyle = `hsl(${color}, 80%, 50%)`;
+			mainContext.fillStyle = `hsla(${color}, 80%, 50%, 0.2)`;
+			if(obj.phys.useRect == true){
+				mainContext.rect(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), obj.phys.width.toCanvasScale(), obj.phys.height.toCanvasScale());
+			}else{
+				mainContext.arc(obj.x.toCanvasXCords(), obj.y.toCanvasYCords(), obj.phys.radius.toCanvasScale(), 0, 2 * Math.PI)
+			}
+			mainContext.stroke();
+			mainContext.fill();
+		});
+	}
+
+	objs.forEach(obj => {
+		if(!obj.func || obj.func.useFunctions == false){return;}
+		obj.func.renderfunctions.forEach((func) => {
+			try {
+				func(obj);
+			} catch (error) {
+				obj.func.catch(error);
+			}
+		});
+	});
 
 	framesRendered++
 }
