@@ -324,5 +324,10 @@ function startUi(){ // run after webpage loaded
 	}, (hasURLParam('skipIntro')?0:(prefersReducedMotion?1000:2500)));
 	
 	loadingText.innerHTML = '';
-	// $('#stratiiIntroLogo').css('color', 'var(--accent-color)');
+	let today = new Date;
+	if(today.getMonth() == 5){
+		$('#stratiiIntroLogo').css('-webkit-text-stroke', '2px var(--accent-color)');
+	}else{
+		$('#stratiiIntroLogo').css('color', 'var(--accent-color)');
+	}
 }
