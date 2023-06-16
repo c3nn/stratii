@@ -5,14 +5,14 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description"content="2D rendering engine, physics engine, & interface. // by c3nn">
-	<meta name="theme-color" content="#000000"/>
+	<meta name="theme-color" content="#181818"/>
 	<title>stratii</title>
 	<link rel="icon" href="assets/baseIconHighRes.png" type="image/x-icon">
 	<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 	<link rel="stylesheet" href="main.css">
 </head>
 <body onload="try {startMain();}catch(error){alert('warning: main JS file missing or currupted');console.warn(error);}try{startUi();}catch(error){alert('warning: ui JS file missing or currupted');console.warn(error);document.querySelector('#loadingUi').style.display = 'none';}">
-<div class="ui">
+<main class="ui">
 	<div class="vSplit" data-height="55%">
 		<div class="hSplit tabCont" data-width="450px" style="--selectedTab: 'obj creator';">
 			<div class="tab" data-title="obj creator" data-show="true">
@@ -56,10 +56,10 @@
 			</div>
 		</div>
 		<div class="hSplit">
-			  ╱|、<br>
-			 (˚ˎ 。7  <br>
-			  |、˜〵          <br>
-			 じしˍ,)ノ
+			<span>  ╱|、</span><br>
+			<span> (˚ˎ 。7  </span><br>
+			<span>  |、˜〵          </span><br>
+			<span> じしˍ,)ノ</span>
 		</div>
 		<div class="hSplit" data-title="devmenu" id="devmenu" style="display: none;">  <!-- dev menu -->
 			<div data-jetbrains style="pointer-events: all; background-color: rgba(104, 21, 182, 0.247);">
@@ -76,25 +76,25 @@
 			</div>
 		</div>
 	</div>
-</div>
+</main>
 
-<div id="menuBar">
+<header id="menuBar">
 	stratii ❧
-</div>
+</header>
 
-<div id="statusBar">
+<footer id="statusBar">
 	<div>
 		<span id="keybindArea" style="margin-left: 2px;"></span>
 		<span style="opacity: 0.4;" data-tooltip="press [/] for more keybinds"><span class="keybind">/</span>for more keybinds</span>
 	</div>
 	<div>
 		<span id="statusMsg" class="statusMsg" style="opacity: 0.7;" data-tooltip=""></span>
-		<span style="opacity: 0.4;">v210-beta</span>
+		<span style="opacity: 0.4;">v211-beta</span>
 		<span class="jsClock" style="opacity: 0.4;" data-tooltip="a clock">[clock]</span>
 		<a data-jetbrains style="opacity: 0.4; margin-right: 2px; text-decoration: none; color: var(--accent-color);" href="https://c3nn.com">c3nn</a>
 		<span id="settingsButton" style="display: none;" class="symbol">settings</span>
 	</div>
-</div>
+</footer>
 
 <div id="keybindsOverlay" class="vSplit overlayWindow">
 	<div class="jsKeybindList hSplit" data-title="Keybinds"></div>

@@ -1,5 +1,5 @@
 # Notes ################
-color obj: { r: 255, g: 255, b: 255, a: 1.0 }
+color obj: { r: 255, g: 255, b: 255, a: 1.0 } - soon to be depreciated (hopefully)
 
     _____________________________________________________________
     |                   |                   |                   |
@@ -12,6 +12,7 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 # TODO ################
 
 #### legend
+- \ = probably not / if everything else is done
 - ? = cant / dont really need/want to
 - none = would be very nice to have
 - ! = yeah we really need this
@@ -23,6 +24,7 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 ## TODO visual
 - ? add parallax to objs
 - ? add bezier curves to mesh objs
+- fix offsets
 
 ## TODO phys
 - !! Number.prototype.toWorld(X/Y)Cords() AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -31,19 +33,18 @@ color obj: { r: 255, g: 255, b: 255, a: 1.0 }
 - buncha stuff, yeah yeah...
 
 ## TODO misc.
-- ? fix function loading from url hash
-- ? FireFox support
+- \ fix function loading from url hash? (may have loading problems from other places too)
+- \ FireFox support
 - ? Mar10 day, March 10th easter egg (Super Stratii Maker)
 - ? add ball drop on new years
 
 ## TODO ui
-- ? polish ms control w/ phys & render tics
-- ? convert resized ui elements back into % from px (or resize children on change)
+- \ polish ms control w/ phys & render tics
+- \ convert resized ui elements back into % from px (or resize children on change)
 - add obj settings
 - add obj list
-- ! fix the camera zooming... don't even ask, idk, wait i might know, nvm, wait i just might know
-- fix extra momentum when droping objs
+- fix extra momentum when droping selected obj
 - ? iframe about popup button (on status bar)
 - ui is strange on chromebook?
 - ? menu bar
-- ? polish tabs
+- ! get rid of color objs. just use w3color (https://www.w3schools.com/lib/w3color.js)

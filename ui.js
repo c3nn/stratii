@@ -18,11 +18,17 @@ selectedObjIndex = 0; // todo
 var mouseMoveStartX,
 mouseMoveStartY,
 mouseMoveCamStartX = null,
-mouseMoveCamStartY;
+mouseMoveCamStartY,
+mouseMoveObjStartX,
+mouseMoveObjStartY;
 function mouseMoveCamFunct(){
 	if(selectedMoveObjIndex != -1){return;}
-	s.cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX);
-	s.cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY);
+	s.cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX).toWorldScale()/2;
+	s.cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY).toWorldScale()/2;
+}
+function mouseMoveObjFunct(){
+	s.cameraX = mouseMoveCamStartX - (mouseMoveStartX - event.clientX).toWorldScale()/2;
+	s.cameraY = mouseMoveCamStartY - (mouseMoveStartY - event.clientY).toWorldScale()/2;
 }
 mainCanvas.addEventListener("mousedown", (event) => {
 	mouseMoveStartX = event.clientX;
@@ -30,7 +36,14 @@ mainCanvas.addEventListener("mousedown", (event) => {
 	mouseMoveCamStartX = s.cameraX;
 	mouseMoveCamStartY = s.cameraY;
 	userSelectOff();
-	window.addEventListener("mousemove", mouseMoveCamFunct);
+	// { do check to see if it's touching an obj } 
+	if(false){ // if not on obj, do cam move
+		window.addEventListener("mousemove", mouseMoveCamFunct);
+	}else{ // if on obj
+		// mouseMoveObjStartX = obj.x
+		// mouseMoveObjStartY = obj.y
+		window.addEventListener("mousemove", mouseMoveObjFunct());
+	}
 });
 window.addEventListener("mouseup", (event) => {
 	if(mouseMoveCamStartX != null){
@@ -134,35 +147,6 @@ function startUi(){ // run after webpage loaded
 		});
 	});
 
-	let selObjMouseOffsetX = 0,
-	selObjMouseOffsetY = 0;
-	mainCanvas.addEventListener('mousedown', event => {
-		if(event.button == 1){return;}
-
-		objs.forEach((obj, index) => {
-			// maybe need bounding offset if it ever exists?
-			let localX = ctxCords(event.offsetX) - obj.x,
-				localY = ctyCords(event.offsetY) - obj.y;
-			let setObj = function(){
-				selObjMouseOffsetX = localX;
-				selObjMouseOffsetY = localY;
-				selectedObjIndex = index;
-				selectedMoveObjIndex = index;
-				obj.temp.noPhys = true;
-				obj.phys.xMomentum = 0;
-				obj.phys.yMomentum = 0;
-			};
-			if(obj.phys.useRect == true){
-				if((localX > 0 && localX < obj.phys.width) && (localY > 0 && localY < obj.phys.height)){
-					setObj();
-				}
-			}else{
-				if(pthag(localX, localY) < obj.phys.radius){
-					setObj();
-				}
-			}
-		});
-	});
 	mainCanvas.addEventListener('mousemove', event => {
 		if(selectedMoveObjIndex == -1 || event.button == 1){return;}
 		
@@ -238,7 +222,7 @@ function startUi(){ // run after webpage loaded
 			m = now.getMinutes(),
 			s = now.getSeconds(),
 			msg = (h == 0 && m <= 5?'<span style="color: white; text-decoration: underline;"> be sure to rest soon, ok </span>':'');
-			element.innerHTML = msg + (h > 12?h-12:h) + ":" + checkTime(m) + ":" + checkTime(s) + (h > 12?'PM':'AM');
+			element.innerHTML = msg + (h == 0?12:(h > 13?h-12:h)) + ":" + checkTime(m) + ":" + checkTime(s) + (h > 12?'PM':'AM');
 		});
 	}, 1000);
 
@@ -260,6 +244,9 @@ function startUi(){ // run after webpage loaded
 			return false;
 		}
 		return true;
+	}
+	mainCanvas.oncontextmenu = function(e){
+		return false;
 	}
 
 	$all('*[data-tooltip]').forEach(element => {

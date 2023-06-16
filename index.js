@@ -25,6 +25,20 @@ $all = function(selector, element = document){return element.querySelectorAll(se
 Element.prototype.$ = function(selector){return $(selector, this);}
 Element.prototype.$all = function(selector){return $all(selector, this);}
 String.prototype.delChar = function(sel){return this.replace(sel,'')};
+function css(name, val = null, options = {resolveToNum: false, obj: $(':root')}){
+	let obj = (options.obj?options.obj:$(':root'));
+	if(val != null){
+		obj.style.setProperty(name, val);
+	}else{
+		let output = getComputedStyle(obj).getPropertyValue(name);
+		return (options.resolveToNum?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);
+	}
+}
+Element.prototype.css = function(name, val = null, options = {resolveToNum: false}){
+	let passedOptions = options;
+	passedOptions.obj = this;
+	css(name, val, passedOptions)
+};
 
 var s = {
 	canvasType: 'base',
@@ -144,8 +158,8 @@ objs = [
 			file: [{x: 0, y: 0},{x: 0, y: 3},{x: 3, y: 3}],
 			fillColor: {r: 146, g: 243, b: 76},
 			borderColor: {r: 0, g: 0, b: 0},
-			borderWidth: 2,
-			fill: true
+			borderWidth: 0,
+			fill: true,
 		},
 		scale: 50,
 		xOffset: 0,
@@ -305,20 +319,6 @@ function loadFromCookies(){
 function clearSave(){
 	setURLHash('');
 }
-Element.prototype.css = function(name, val = null, options = {resolveToNum: false}){
-	let passedOptions = options;
-	passedOptions.obj = this;
-	css(name, val, passedOptions)
-};
-function css(name, val = null, options = {resolveToNum: false, obj: $(':root')}){
-	let obj = (options.obj?options.obj:$(':root'));
-	if(val != null){
-		obj.style.setProperty(name, val);
-	}else{
-		let output = getComputedStyle(obj).getPropertyValue(name);
-		return (options.resolveToNum?Number(output.delChar(' ').delChar('px').delChar('%').delChar('s')):output);
-	}
-}
 function saveCSSVars(){
 	let varList = ['bg-color','dark-accent-color','accent-color','yellow-color','red-color','split-border-thickness','title-size','menu-bar-height','status-bar-height']
 	s.cssVars = []
@@ -345,12 +345,30 @@ Number.prototype.toCanvasYCords = function(camY = s.cameraY, camZoom = s.cameraZ
 Number.prototype.toCanvasScale = function(camZoom = s.cameraZoom){
 	return this * camZoom;
 }
-Number.prototype.toWorldXCords = function (camX = s.cameraX, camZoom = s.cameraZoom) {
-	return 0;
-	//! I DONT KNOW
-	// return ((this - canvasZoomPosX)/ - camZoom)-camX;
-	// return (this-canvasZoomPosX)/(camZoom-1)-camX;
+Number.prototype.toWorldXCords = function(precision = 0.1, guessLimit = 1000, camX = s.cameraX, camZoom = s.cameraZoom){
+	// try to guess the best result IDK
+	// W = world cords
+	// C = canvas cords
+	let bestGuessW = -500,
+	guessNum = 0,
+	bestDifferenceC = 1000;
+	while(bestDifferenceC > precision && guessNum < guessLimit){
+		let guessW = bestGuessW + Math.random()*(bestDifferenceC*2-bestDifferenceC).toWorldScale();
+		let differenceC = Math.abs(guessW.toCanvasXCords() - this);
+		// console.warn(bestGuessW);
+		if(differenceC < bestDifferenceC){ // problem?
+			bestGuessW = guessW;
+			bestDifferenceC = differenceC;
+		}
+		guessNum++
+	}
+	return bestGuessW;
 };
+// mainCanvas.addEventListener('click', event => {
+// 	let result = event.clientX.toWorldXCords();
+// 	console.log(result);
+// 	objs[0].x = result;
+// });
 Number.prototype.toWorldYCords = function(camY = s.cameraY, camZoom = s.cameraZoom){
 	// return -(this/(camZoom-1))-camY;
 	//! I DONT KNOW AAAAAA
@@ -383,27 +401,32 @@ function statusErrMsg(msg, tooltip = ''){
 
 function renderTexture(texture, width, height, x, y, scale = 1, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom)
 {
+	let canvasX = x.toCanvasXCords(camX, camZoom),
+	canvasY = y.toCanvasYCords(camY, camZoom),
+	pixelSize = Math.round(scale.toCanvasScale(camZoom));
 	for(let i = 0; i < width*height; i++){
 		let pixelColor = getFromImageDataI(i, texture);
 		let pixelX = (i%width);
-		let pixelY = Math.floor(i/height);
-		drawPixel((x + (pixelX*scale)).toCanvasXCords(camX, camZoom), (y + (pixelY*scale)).toCanvasYCords(camY, camZoom), pixelColor, canvas, scale.toCanvasScale(camZoom));
+		let pixelY = Math.floor(i/width);
+		drawPixel(canvasX + (pixelX*pixelSize), canvasY + (pixelY*pixelSize), pixelColor, canvas, pixelSize);
 	}
 }
 
-function renderMesh(mesh, x, y, scale, canvas = mainContext)
+function renderMesh(mesh, x, y, scale, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom)
 {
 	canvas.beginPath();
-	canvas.fillStyle = mesh.fillColor;
-	canvas.strokeStyle = mesh.borderColor;
-	canvas.strokeWidth = mesh.borderWidth;
+	canvas.fillStyle = colorObjToRGB(mesh.fillColor);
+	canvas.strokeStyle = colorObjToRGB(mesh.borderColor);
+	canvas.lineWidth = mesh.borderWidth.toCanvasScale();
 	mesh.file.forEach(vertex => {
-		canvas.lineTo((x + vertex.x*scale).toCanvasXCords(), (y + vertex.y*scale).toCanvasYCords());
+		canvas.lineTo((x + vertex.x*scale).toCanvasXCords(camX, camZoom), (y + vertex.y*scale).toCanvasYCords(camY, camZoom));
 	});
 	if(mesh.fill == true){
 		canvas.fill();
 	}
-	canvas.stroke();
+	if(mesh.borderWidth != 0){
+		canvas.stroke();
+	}
 }
 
 function renderObjTexture(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {width: 1, height: 1, color: [0,0,0,0], normal: [0,0,0,0]}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
@@ -411,34 +434,9 @@ function renderObjTexture(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale
 	renderTexture((useNormals?obj.vis.texture.normal:obj.vis.texture.color), obj.vis.texture.width, obj.vis.texture.height, obj.x, obj.y, obj.vis.scale, canvas, camX, camY, camZoom);
 }
 
-function renderObjModel(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, mesh: {file: [{x: 0, y: 0}], fillColor: {r,g,b}, borderColor: {r,g,b}, borderWidth: 2, fill: true}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom, useNormals = false)
+function renderObjModel(obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, mesh: {file: [{x: 0, y: 0}], fillColor: {r,g,b}, borderColor: {r,g,b}, borderWidth: 2, fill: true}}}, canvas = mainContext, camX = s.cameraX, camY = s.cameraY, camZoom = s.cameraZoom)
 {
-	renderMesh(obj.vis.mesh, obj.x+obj.vis.xOffset, obj.y+obj.vis.yOffset, obj.vis.scale, canvas);
-}
-
-function renderObj(context, obj = {x: 0, y: 0, vis: {xOffset: 0, yOffset: 0, scale: 1, texture: {}}}, camX = 0, camY = 0, camZoom = 1, useNormals = false) // depreciated
-{
-	if(obj.vis.useTexture == true){
-		let objX = camX + Math.round((obj.x + obj.vis.yOffset) * camZoom),
-		objY = camY + Math.round((obj.y + obj.vis.yOffset )* camZoom),
-		objZoom = Math.round(obj.vis.scale * camZoom);
-		for (let i = 0; i < obj.vis.texture.width*obj.vis.texture.height; i++) {
-			let tPix = getFromImageDataI(i,(useNormals == true?obj.vis.texture.normal:obj.vis.texture.color));
-			drawPixel(objX + (i%obj.vis.texture.width) * objZoom , objY + Math.floor(i/obj.vis.texture.width) * objZoom, tPix, context, objZoom);
-		}
-	}else{
-		let objX = camX + obj.x * camZoom,
-		objY = camY + obj.y * camZoom,
-		objZoom = obj.vis.scale * camZoom;
-		obj.vis.mesh.file.forEach(face => {
-			context.fillStyle = colorObjToRGB(obj.vis.mesh.color);
-			context.beginPath();
-			face.forEach(vertex => {
-				context.lineTo(objX + vertex.x * objZoom, objY + vertex.y * objZoom);
-			});
-			context.fill();
-		});
-	}
+	renderMesh(obj.vis.mesh, obj.x+obj.vis.xOffset, obj.y+obj.vis.yOffset, obj.vis.scale, canvas, camX, camY, camZoom);
 }
 
 function renderTic()
@@ -454,7 +452,7 @@ function renderTic()
 	}
 
 	objs.forEach(obj => {
-		if(obj.vis.useTexture == true){
+		if(obj.vis.useTexture){
 			renderObjTexture(obj);
 		}else{
 			renderObjModel(obj);
